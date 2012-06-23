@@ -2,3 +2,4 @@ classifier_training/*
 classifier_testing/*
 data/*
 .rbenv-version
+Gemfile.lock
