@@ -148,21 +148,18 @@ describe Pest::DataSet::NArray do
 
     context "with integer argument" do
       it "returns a copy with the vector at the passed index" do
-        pending "data refactor"
         @all[3].should == @index_subset
       end
     end
 
     context "with a range argument" do
       it "returns a copy with the vectors specified by the range" do
-        pending "data refactor"
         @all[0..1].should == @range_subset
       end
     end
 
     context "with multiple arguments" do
       it "returns a copy with the union of the passed arguments" do
-        pending "data refactor"
         @all[3,0..1].should == @union_subset
       end
     end
@@ -176,7 +173,6 @@ describe Pest::DataSet::NArray do
     end
 
     it "returns the union of self and other" do
-      pending "data refactor"
       (@set_1 + @set_2).should == @all
     end
   end

@@ -93,15 +93,21 @@ describe Pest::DataSet do
 
   describe "#[]" do
     context "with a single argument" do
-      it "returns NotImplementedError"
+      it "returns NotImplementedError" do
+        expect { @instance[1] }.to raise_error(NotImplementedError)
+      end
     end
 
     context "with multiple arguments" do
-      it "returns NotImplementedError"
+      it "returns NotImplementedError" do
+        expect { @instance[1,5] }.to raise_error(NotImplementedError)
+      end
     end
   end
 
   describe "#+" do
-    it "returns NotImplementedError"
+    it "returns NotImplementedError" do
+      expect { @instance + @instance }.to raise_error(NotImplementedError)
+    end
   end
 end

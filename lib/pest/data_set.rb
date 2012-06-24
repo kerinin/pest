@@ -33,6 +33,14 @@ module Pest::DataSet
   end
   alias :eql? :==
 
+  def [](*args)
+    raise NotImplementedError
+  end
+
+  def +(other)
+    raise NotImplementedError
+  end
+
   module ClassMethods
     def from(data_source)
       # Try to translate the data source directly

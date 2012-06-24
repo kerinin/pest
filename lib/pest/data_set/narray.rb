@@ -80,27 +80,28 @@ class Pest::DataSet::NArray
     end
   end
 
-  # def [](*args)
-  #   args.map do |arg|
-  #     if arg.kind_of?(Integer) or arg.kind_of?(Range)
-  #       subset = self.clone
-  #       subset.data = self.data_vectors[arg]
-  #       subset
-  #     else
-  #       raise ArgumentError
-  #     end
-  #   end.collect(:+)
-  # end
+  def [](*args)
+    args.map do |arg|
+      if arg.kind_of?(Integer) or arg.kind_of?(Range)
+        subset = self.clone
+        subset.data = self.data_vectors[arg].transpose
+        subset
+      else
+        raise ArgumentError
+      end
+    end.inject(:+)
+  end
 
-  # def +(other)
-  #   unless other.variables == variables
-  #     raise ArgumentError, "DataSets have different variables"
-  #   end
+  def +(other)
+    unless other.variables == variables
+      raise ArgumentError, "DataSets have different variables"
+    end
 
-  #   union = self.clone
-  #   union.data = self.data + other.data
-  #   union
-  # end
+    union = self.class.new
+    union.variables = variables
+    union.data = NMatrix[*(data.transpose.to_a + other.data.transpose.to_a)].transpose
+    union
+  end
 
   class VectorEnumerable
     include Enumerable
