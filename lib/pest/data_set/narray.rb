@@ -57,8 +57,8 @@ class Pest::DataSet::NArray
 
   # variables: an array of variables for which each vector should contain values
   # Order is retained in the returned value
-  def data_vectors(variables=nil)
-    VectorEnumerable.new(self, variables)
+  def data_vectors(*variables)
+    VectorEnumerable.new(self, *variables)
   end
 
   def length
@@ -103,14 +103,37 @@ class Pest::DataSet::NArray
     union
   end
 
+  def to_variable(arg)
+    variable = case arg.class.name
+    when 'Pest::Variable'
+      arg
+    when 'String', 'Symbol'
+      variables[arg] || Pest::Variable.new(:name => arg)
+    end
+    raise ArgumentError unless variables.values.include?(variable)
+    variable
+  end
+
   class VectorEnumerable
     include Enumerable
 
-    def initialize(data_set, variables = true)
+    def initialize(data_set, *variables)
       @data_set = data_set
-      @variables = variables
-      if @variables.kind_of?(Enumerable)
-        @variables = variables.map {|v| @data_set.variable_array.index(v)}
+
+      if not variables.any?
+        @variables = true
+      elsif variables.kind_of?(Enumerable)
+        @variables = variables.map do |variable|
+         data_set.to_variable(variable)
+        end.map do |variable|
+          data_set.variable_array.index(variable)
+        end
+      else
+        @variables = Array(
+          data_set.variable_array.index(
+            data_set.to_variable(variables)
+          )
+        )
       end
     end
 

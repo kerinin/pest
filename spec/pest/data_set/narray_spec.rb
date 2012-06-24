@@ -93,7 +93,7 @@ describe Pest::DataSet::NArray do
 
   describe "#to_hash" do
     before(:each) do
-      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
+      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
     end
 
     it "sets keys" do
@@ -107,7 +107,7 @@ describe Pest::DataSet::NArray do
 
   describe "#data_vectors" do
     before(:each) do
-      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
+      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
     end
 
     it "returns an enumerable" do
@@ -117,6 +117,18 @@ describe Pest::DataSet::NArray do
     it "slices" do
       # NOTE: This is returning an array - probably could be more efficient
       @instance.data_vectors.first.should == [4,1]
+    end
+
+    it "accepts a single variable string" do
+      @instance.data_vectors(:foo).first.should == [1]
+    end
+
+    it "accepts a single variable" do
+      @instance.data_vectors(@v1).first.should == [1]
+    end
+
+    it "accepts multiple variables" do
+      @instance.data_vectors(:foo, :bar).first.should == [1,4]
     end
   end
 
