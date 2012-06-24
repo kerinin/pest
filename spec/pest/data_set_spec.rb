@@ -91,5 +91,17 @@ describe Pest::DataSet do
     end
   end
 
-  # Enumerable interface?
+  describe "#[]" do
+    context "with a single argument" do
+      it "returns NotImplementedError"
+    end
+
+    context "with multiple arguments" do
+      it "returns NotImplementedError"
+    end
+  end
+
+  describe "#+" do
+    it "returns NotImplementedError"
+  end
 end

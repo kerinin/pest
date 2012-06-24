@@ -48,7 +48,7 @@ describe Pest::DataSet::NArray do
     end
 
     it "creates a NArray" do
-      @class.from_hash({@v1 => [1,2,3], @v2 => [4,5,6]}).should == @matrix
+      @class.from_hash({@v1 => [1,2,3], @v2 => [4,5,6]}).data.should == @matrix
     end
 
     it "sets variables" do
@@ -136,6 +136,49 @@ describe Pest::DataSet::NArray do
       Tempfile.should_receive(:new).and_return(@file)
       @instance.save
       @class.from_file(@file.path).should == @instance
+    end
+  end
+
+  describe "#[]" do
+    before(:each) do
+      @all = @class.from_hash @v1 => [1,2,3,4], @v2 => [5,6,7,8]
+      @range_subset = @class.from_hash @v1 => [1,2], @v2 => [5,6]
+      @index_subset = @class.from_hash @v1 => [4], @v2 => [8]
+      @union_subset = @class.from_hash @v1 => [4,1,2], @v2 => [8,5,6]
+    end
+
+    context "with integer argument" do
+      it "returns a copy with the vector at the passed index" do
+        pending "data refactor"
+        @all[3].should == @index_subset
+      end
+    end
+
+    context "with a range argument" do
+      it "returns a copy with the vectors specified by the range" do
+        pending "data refactor"
+        @all[0..1].should == @range_subset
+      end
+    end
+
+    context "with multiple arguments" do
+      it "returns a copy with the union of the passed arguments" do
+        pending "data refactor"
+        @all[3,0..1].should == @union_subset
+      end
+    end
+  end
+
+  describe "#+" do
+    before(:each) do
+      @all = @class.from_hash @v1 => [1,2,4], @v2 => [5,6,8]
+      @set_1 = @class.from_hash @v1 => [1,2], @v2 => [5,6]
+      @set_2 = @class.from_hash @v1 => [4], @v2 => [8]
+    end
+
+    it "returns the union of self and other" do
+      pending "data refactor"
+      (@set_1 + @set_2).should == @all
     end
   end
 end

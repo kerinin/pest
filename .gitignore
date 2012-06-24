@@ -1,3 +1,4 @@
+pkg
 classifier_training/*
 classifier_testing/*
 data/*

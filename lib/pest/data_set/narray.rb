@@ -1,6 +1,6 @@
 require 'narray'
 
-class Pest::DataSet::NArray < NMatrix
+class Pest::DataSet::NArray
   include Pest::DataSet
 
   def self.translators
@@ -13,8 +13,8 @@ class Pest::DataSet::NArray < NMatrix
   end
 
   def self.from_hash(hash)
-    data_set = to_na(hash.keys.sort.map {|key| hash[key]}) # Ensure the matrix is sorted the same as the variables
-    data_set.variables = {}
+    data_set = new
+    data_set.data = NMatrix.to_na(hash.keys.sort.map {|key| hash[key]}) # Ensure the matrix is sorted the same as the variables
     hash.keys.each do |key|
       variable = key.kind_of?(Pest::Variable) ? key : Pest::Variable.new(:name => key)
       data_set.variables[variable.name] = variable
@@ -22,12 +22,13 @@ class Pest::DataSet::NArray < NMatrix
     data_set
   end
 
+  # RM NOTE: fuck this - save to CSV
   def self.from_file(file)
     file = File.open(file.to_s, 'r') if file.kind_of?(String)
 
     begin
       variables, matrix = Marshal.restore(file)
-      data_set = to_na(matrix)
+      data_set = NMatrix.to_na(matrix)
       data_set.variables = variables
       data_set
     rescue
@@ -36,23 +37,29 @@ class Pest::DataSet::NArray < NMatrix
   end
 
   def self.from_csv(file, args={})
-    args = args.merge({:converters => :all})
-    data = CSV.read(file, args)
-    data_set = to_na(data[1..-1]).transpose
-    data_set.variables = {}
-    data[0].each do |key|
+    args = args.merge({:headers => true, :converters => :all})
+    csv_data = CSV.read(file, args).map(&:to_hash)
+
+    data_set = new
+    data_set.data = NMatrix.to_na(csv_data.map(&:values)).transpose
+    csv_data.first.keys.each do |key|
       variable = key.kind_of?(Pest::Variable) ? key : Pest::Variable.new(:name => key)
       data_set.variables[variable.name] = variable
     end
     data_set
   end
 
-  attr_accessor :variables
+  attr_accessor :variables, :data
+
+  def initialize(variables = {}, data = nil)
+    @variables = variables
+    @data = data
+  end
 
   def to_hash
     hash = {}
     variables.values.each_index do |i|
-      hash[variables.values[i]] = self[true,i].to_a[0]
+      hash[variables.values[i]] = data[true,i].to_a[0]
     end
     hash
   end
@@ -64,15 +71,37 @@ class Pest::DataSet::NArray < NMatrix
   end
 
   def length
-    shape[0]
+    data.shape[0]
   end
 
   def save(file=nil)
     file ||= Tempfile.new('pest_hash_dataset')
     file = File.open(file, 'w') if file.kind_of?(String)
-    Marshal.dump([variables,to_a], file)
+    Marshal.dump([variables,data.to_a], file)
     file.close
   end
+
+  # def [](*args)
+  #   args.map do |arg|
+  #     if arg.kind_of?(Integer) or arg.kind_of?(Range)
+  #       subset = self.clone
+  #       subset.data = self.data_vectors[arg]
+  #       subset
+  #     else
+  #       raise ArgumentError
+  #     end
+  #   end.collect(:+)
+  # end
+
+  # def +(other)
+  #   unless other.variables == variables
+  #     raise ArgumentError, "DataSets have different variables"
+  #   end
+
+  #   union = self.clone
+  #   union.data = self.data + other.data
+  #   union
+  # end
 
   class VectorEnumerable
     include Enumerable
@@ -86,11 +115,11 @@ class Pest::DataSet::NArray < NMatrix
     end
 
     def [](i)
-      @data_set[i,@variables].transpose
+      @data_set.data[i,@variables].transpose
     end
 
     def each
-      (0..@data_set.shape[0]-1).each do |i|
+      (0..@data_set.data.shape[0]-1).each do |i|
         yield Array(self[i]).first
       end
     end

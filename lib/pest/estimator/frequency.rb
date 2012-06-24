@@ -43,7 +43,7 @@ class Pest::Estimator::Frequency
     private
 
     def unique_event_dataset
-      vectors = Pest::DataSet::NArray[@frequencies.keys]
+      vectors = NMatrix[@frequencies.keys]
       hash = {}
       variable_array.each_index do |i|
         # Extract a single variable from the array of vectors
