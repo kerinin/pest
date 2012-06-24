@@ -65,18 +65,20 @@ e.h(:foo).given(:bar)                                 # Cross entropy of 'foo' :
 e.mutual_information(:foo, :bar)                      # Mutual information of 'foo' and 'bar'
 e.i(:foo, :bar)                                       # Alias
 
-# Estimating Point Probability (Set & Discrete only)
-e.probability(o.variables[:foo])                      # (Set/Discrete only) Estimate the probability of all values of 'foo'
-e.p(:foo)                                             # Same as above, tries to find a variable named 'foo'
-e.p(:foo).in(test)                                    # Estimate the probability of values in dataset 'test'
-e.p(:foo).given(:bar).in(test)                        # Estimate the conditional foo | bar for the values in 'test'
-e.p(:foo, :bar).in(test)                              # Estimate the joint probablity foo AND bar
-e.p(:foo, :bar).given(:baz, :qux).in(test)            # More complex joint & conditional probabilities
-e.p(:foo => 4, :bar => 2).given(:baz => 0)            # Single prediction (implicitly creates dataset)
-e.p(:foo).given(:bar).cache                           # Builds and persists the model for 'foo|bar'
-e.p(:foo).given(:bar).cache('path.csv')               # Persist to a specific path (defaults to tmp)
+# Estimating Point Probability
+e.probability(o.variables[:foo] => 1)                 # Estimate the probability that foo=1
+e.p(:foo => 1)                                        # Same as above, tries to find a variable named 'foo'
+e.p(:foo => 1, :bar => 2)                             # Estimate the probability that foo=1 AND bar=2
+e.p(:foo => 1).given(:bar => 2)                       # Estimate the probability that foo=1 given bar=2
+e.p(:foo => 1, :bar => 2).given(:baz => 3, :qux => 4) # Moar
 
-# Estimating Cumulative & Interval Probability (Discrete & Continuous only)
+# Batch Point Probability Estimation
+e.batch_probability(:foo).in(test)                    # Estimate the probability of each value in test
+e.batch_p(:foo, :bar).in(test)                        # Joint probability
+e.batch_p(:foo).given(:bar).in(test)                  # Conditional probability
+e.batch_p(:foo, :bar).given(:baz, :qux).in(test)      # Moar
+
+# Estimating Cumulative & Interval Probability
 e.probability(:foo).greater_than(:bar).in(test)
 e.p(:foo).greater_than(:bar).less_than(:baz).in(test)
 e.p(:foo).gt(:bar).lt(:baz).given(:qux).in(test)

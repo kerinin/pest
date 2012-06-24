@@ -14,16 +14,16 @@ describe Pest::Estimator::Frequency do
     @instance.should be_a(Pest::Estimator)
   end
 
-  it "generates marginal probabilities" do
-    @instance.p(@v2).in(@test).should === NArray[[1.0, 1.0, 1.0]]
+  it "generates marginal batch_probabilities" do
+    @instance.batch_p(@v2).in(@test).should === NArray[[1.0, 1.0, 1.0]]
   end
 
-  it "generates joint probability" do
-    @instance.p(@v1, @v2).in(@test).should == NArray[[0.5, 0.25, 0]]
+  it "generates joint batch_probability" do
+    @instance.batch_p(@v1, @v2).in(@test).should == NArray[[0.5, 0.25, 0]]
   end
 
-  it "generates conditional probability" do
-    @instance.p(@v1).given(@v2).in(@test).should == NArray[[0.5, 0.25, 0]]
+  it "generates conditional batch_probability" do
+    @instance.batch_p(@v1).given(@v2).in(@test).should == NArray[[0.5, 0.25, 0]]
   end
 
   describe Pest::Estimator::Frequency::Distribution do
@@ -43,13 +43,13 @@ describe Pest::Estimator::Frequency do
       end
     end
 
-    describe "#probability" do
+    describe "#batch_probability" do
       it "returns an NArray" do
-        @dist.probability(@test).should be_a(NArray)
+        @dist.batch_probability(@test).should be_a(NArray)
       end
 
       it "calculates vector frequency / dataset length"  do
-        @dist.probability(@test).should == NArray[[0.5,0.25,0]]        
+        @dist.batch_probability(@test).should == NArray[[0.5,0.25,0]]        
       end
     end
     

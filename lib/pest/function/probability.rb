@@ -1,11 +1,11 @@
 module Pest::Function
   module Probability
-    def probability(*variables)
-      Builder.new(self, variables)
+    def batch_probability(*variables)
+      BatchBuilder.new(self, variables)
     end
-    alias :p :probability
+    alias :batch_p :batch_probability
 
-    class Builder
+    class BatchBuilder
       include Pest::Function::Builder
 
       attr_reader :estimator, :data_source, :event, :givens
@@ -28,11 +28,11 @@ module Pest::Function
       end
 
       def evaluate
-        joint = estimator.distributions[event].probability(data_source)
+        joint = estimator.distributions[event].batch_probability(data_source)
         if givens.empty?
           joint
         else
-          conditional = estimator.distributions[givens].probability(data_source)
+          conditional = estimator.distributions[givens].batch_probability(data_source)
           joint / conditional
         end
       end

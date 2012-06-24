@@ -36,7 +36,7 @@ module Pest::Estimator
       variables.to_a.sort
     end
 
-    def probability
+    def batch_probability
       raise NotImplementedError
     end
   end

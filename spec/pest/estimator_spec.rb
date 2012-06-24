@@ -67,7 +67,14 @@ describe Pest::Estimator do
 
     describe "#probability" do
       it "raises no implemented" do
+        pending
         expect { @instance.probability }.to raise_error(NotImplementedError)
+      end
+    end
+
+    describe "#batch_probability" do
+      it "raises no implemented" do
+        expect { @instance.batch_probability }.to raise_error(NotImplementedError)
       end
     end
   end

@@ -24,7 +24,7 @@ class Pest::Estimator::Frequency
       end
     end
 
-    def probability(data)
+    def batch_probability(data)
       cache_model
 
       NArray[ data.data_vectors(*variable_array).map do |vector|
@@ -35,7 +35,7 @@ class Pest::Estimator::Frequency
     def entropy
       cache_model
 
-      probabilities = probability(unique_event_dataset)
+      probabilities = batch_probability(unique_event_dataset)
 
       (-probabilities * NMath.log2(probabilities)).sum
     end
