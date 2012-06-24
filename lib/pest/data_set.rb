@@ -27,6 +27,12 @@ module Pest::DataSet
     raise NotImplementedError
   end
 
+  def ==(other)
+    variables.values.to_set == other.variables.values.to_set and
+    data == other.data
+  end
+  alias :eql? :==
+
   module ClassMethods
     def from(data_source)
       # Try to translate the data source directly

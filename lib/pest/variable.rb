@@ -2,8 +2,6 @@ class Pest::Variable
   def self.deserialize(string)
     if string.chomp =~ /^([^\:]+)\:(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})$/
       new :name => $1, :uuid => $2
-    else
-      raise "Unable to parse string"
     end
   end
 

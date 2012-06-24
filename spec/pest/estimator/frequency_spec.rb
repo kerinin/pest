@@ -32,29 +32,14 @@ describe Pest::Estimator::Frequency do
     end
 
     describe "#cache_model" do
-      context "with unrecognized checksum" do
-        it "determines vector frequency" do
-          @dist.cache_model
-          @dist.frequencies[[1,1]].should == 2
-        end
-
-        it "defaults to 0" do
-          @dist.cache_model
-          @dist.frequencies[[4,1]].should == 0
-        end
+      it "determines vector frequency" do
+        @dist.cache_model
+        @dist.frequencies[[1,1]].should == 2
       end
 
-      context "with recognized checksum but no file" do
-        it "determines vector frequency" do
-          @data.should_receive(:data_vectors).and_return @data
-          @dist.cache_model
-        end
-      end
-
-      context "with recognized checksum and cache file" do
-        before(:each) do
-          @file = @dist.cache_model
-        end
+      it "defaults to 0" do
+        @dist.cache_model
+        @dist.frequencies[[4,1]].should == 0
       end
     end
 

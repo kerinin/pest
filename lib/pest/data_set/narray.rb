@@ -22,28 +22,19 @@ class Pest::DataSet::NArray
     data_set
   end
 
-  # RM NOTE: fuck this - save to CSV
   def self.from_file(file)
-    file = File.open(file.to_s, 'r') if file.kind_of?(String)
-
-    begin
-      variables, matrix = Marshal.restore(file)
-      data_set = NMatrix.to_na(matrix)
-      data_set.variables = variables
-      data_set
-    rescue
-      raise "File does not seem to contain valid data"
-    end
+    from_csv(file)
   end
 
   def self.from_csv(file, args={})
-    args = args.merge({:headers => true, :converters => :all})
+    args = {:col_sep => "\t", :headers => true, :converters => :all}.merge args
     csv_data = CSV.read(file, args).map(&:to_hash)
 
     data_set = new
     data_set.data = NMatrix.to_na(csv_data.map(&:values)).transpose
     csv_data.first.keys.each do |key|
-      variable = key.kind_of?(Pest::Variable) ? key : Pest::Variable.new(:name => key)
+      # variable = key.kind_of?(Pest::Variable) ? key : Pest::Variable.new(:name => key)
+      variable = Pest::Variable.deserialize(key) || Pest::Variable.new(:name => key)
       data_set.variables[variable.name] = variable
     end
     data_set
@@ -75,10 +66,18 @@ class Pest::DataSet::NArray
   end
 
   def save(file=nil)
-    file ||= Tempfile.new('pest_hash_dataset')
-    file = File.open(file, 'w') if file.kind_of?(String)
-    Marshal.dump([variables,data.to_a], file)
-    file.close
+    if file.kind_of?(File) or file.kind_of?(Tempfile)
+     file_path = file.path
+    elsif file.kind_of?(String)
+     file_path = file
+    else
+     file_path = Tempfile.new(['pest_hash_dataset', '.tsv']).path
+    end
+
+    CSV.open(file_path, 'w', :col_sep => "\t") do |csv|
+      csv << variables.values.map(&:serialize)
+      data.transpose.to_a.each {|row| csv << row}
+    end
   end
 
   # def [](*args)

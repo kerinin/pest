@@ -23,22 +23,9 @@ describe Pest::DataSet::NArray do
   end
 
   describe "::from_file" do
-    before(:each) do
-      @matrix = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
-      @file = Tempfile.new('test')
-      @matrix.save(@file.path)
-    end
-
-    it "loads from NArray IO" do
-      @class.from_file(@file).should == @matrix
-    end
-
-    it "looks for NArray from string" do
-      @class.from_file(@file.path).should == @matrix
-    end
-      
-    it "sets variables" do
-      @class.from_file(@file).variables.values.should == [@v1, @v2]
+    it "delegates to from_csv" do
+      @class.should_receive(:from_csv)
+      @class.from_file('foo')
     end
   end
 
@@ -63,7 +50,7 @@ describe Pest::DataSet::NArray do
   describe "::from_csv" do
     before(:each) do
       @file = Tempfile.new('test_csv')
-      CSV.open(@file.path, 'w') do |csv|
+      CSV.open(@file.path, 'w', :col_sep => "\t") do |csv|
         csv << ["foo", "bar"]
         csv << [1,1]
         csv << [1,2]
@@ -89,6 +76,18 @@ describe Pest::DataSet::NArray do
     it "accepts an IO" do
       @instance = @class.from_csv @file
       @instance.to_hash.should == {@instance.variables["foo"] => [1,1,1], @instance.variables["bar"] => [1,2,3]}
+    end
+
+    it "deserializes variables if found" do
+      @file = Tempfile.new('test_csv')
+      CSV.open(@file.path, 'w', :col_sep => "\t") do |csv|
+        csv << [@v1,@v2].map(&:serialize)
+        csv << [1,1]
+        csv << [1,2]
+        csv << [1,3]
+      end
+
+      @class.from_csv(@file).variables.should == {'foo' => @v1, 'bar' => @v2}
     end
   end
 
@@ -127,7 +126,7 @@ describe Pest::DataSet::NArray do
       @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
     end
 
-    it "marshals to file" do
+    it "saves to file" do
       @instance.save(@file)
       @class.from_file(@file.path).should == @instance
     end
