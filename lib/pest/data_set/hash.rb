@@ -82,4 +82,10 @@ class Pest::DataSet::Hash
     end
     subset
   end
+
+  def each(&block)
+    (0..length-1).to_a.each do |i|
+      yield variables.keys.map {|key| hash[key][i]}
+    end
+  end
 end

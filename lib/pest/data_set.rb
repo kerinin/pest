@@ -3,6 +3,8 @@ module Pest::DataSet
     base.extend(ClassMethods)
   end
 
+  include Enumerable
+
   attr_accessor :variables, :data
 
   def initialize(variables = {}, data = nil)
@@ -47,6 +49,10 @@ module Pest::DataSet
   end
 
   def pick(*args)
+    raise NotImplementedError
+  end
+
+  def each(&block)
     raise NotImplementedError
   end
 

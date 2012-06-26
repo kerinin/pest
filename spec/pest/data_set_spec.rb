@@ -110,4 +110,15 @@ describe Pest::DataSet do
       expect { @instance + @instance }.to raise_error(NotImplementedError)
     end
   end
+
+  it "inherits from Enumerable" do
+    @instance = TestClass.new
+    @instance.should be_a(Enumerable)
+  end
+
+  describe "#each" do
+    it "yields vectors" do
+      expect { @instance.each {} }.to raise_error(NotImplementedError)
+    end
+  end
 end

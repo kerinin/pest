@@ -161,4 +161,18 @@ describe Pest::DataSet::NArray do
       (@set_1 + @set_2).should == @all
     end
   end
+
+  describe "#each" do
+    before(:each) do
+      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+    end
+
+    it "yields vectors" do
+      block = double("block")
+      block.should_receive(:yielding).with([1,4])
+      block.should_receive(:yielding).with([2,5])
+      block.should_receive(:yielding).with([3,6])
+      @instance.each {|i| block.yielding(i)}
+    end
+  end
 end

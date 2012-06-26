@@ -6,6 +6,8 @@ require 'spec_helper'
 
 describe Pest::DataSet::Hash do
   before(:each) do
+    @v1 = Pest::Variable.new(:name => :foo)
+    @v2 = Pest::Variable.new(:name => :bar)
     @class = Pest::DataSet::Hash
   end
 
@@ -26,15 +28,11 @@ describe Pest::DataSet::Hash do
     end
 
     it "retains variable names if passed" do
-      @v1 = Pest::Variable.new(:name => :foo)
-      @v2 = Pest::Variable.new(:name => :bar)
       @instance = Pest::DataSet::Hash.from_hash(@v1 => [1,2,3], @v2 => [3,4,5])
       @instance.variables.keys.should == [:foo, :bar]
     end
     
     it "retains variables if passed" do
-      @v1 = Pest::Variable.new(:name => :foo)
-      @v2 = Pest::Variable.new(:name => :bar)
       @instance = Pest::DataSet::Hash.from_hash(@v1 => [1,2,3], @v2 => [3,4,5])
       @instance.variables.values.should == [@v1, @v2]
     end
@@ -53,8 +51,6 @@ describe Pest::DataSet::Hash do
 
   describe "#pick" do
     before(:each) do
-      @v1 = Pest::Variable.new(:name => :foo)
-      @v2 = Pest::Variable.new(:name => :bar)
       @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
     end
 
@@ -79,6 +75,20 @@ describe Pest::DataSet::Hash do
 
     it "delegates to hash" do
       @instance.length.should == 3
+    end
+  end
+
+  describe "#each" do
+    before(:each) do
+      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+    end
+
+    it "yields vectors" do
+      block = double("block")
+      block.should_receive(:yielding).with([1,4])
+      block.should_receive(:yielding).with([2,5])
+      block.should_receive(:yielding).with([3,6])
+      @instance.each {|i| block.yielding(i)}
     end
   end
 end

@@ -101,4 +101,10 @@ class Pest::DataSet::NArray
     subset.data = self.data[true, picked_indices]
     subset
   end
+
+  def each(&block)
+    (0..length-1).to_a.each do |i|
+      yield data[i,true].transpose.to_a.first
+    end
+  end
 end
