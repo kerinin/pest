@@ -11,6 +11,7 @@ describe Pest::Function::Probability do
     @v2 = Pest::Variable.new(:name => :bar)
     @v3 = Pest::Variable.new(:name => :baz)
     @instance = ProbabilityTestClass.new
+    @instance.stub(:data).and_return(Pest::DataSet::Hash.from_hash(@v1 => [1], @v2 => [1]))
     @instance.stub(:variables).and_return({:foo => @v1, :bar => @v2})
   end
 
@@ -89,7 +90,7 @@ describe Pest::Function::Probability do
       it "gets probability of event" do
         event = double('EventDist')
         @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
-        event.should_receive(:batch_probability).and_return 0.5
+        event.should_receive(:probability).and_return 0.5
 
         ProbabilityTestClass::BatchBuilder.new(@instance,[:foo]).evaluate
       end
@@ -99,8 +100,8 @@ describe Pest::Function::Probability do
         given = double('GivenDist')
         @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
         @instance.distributions.stub(:[]).with([@v2].to_set).and_return(given)
-        event.stub(:batch_probability).and_return 0.5
-        given.should_receive(:batch_probability).and_return 0.5
+        event.stub(:probability).and_return 0.5
+        given.should_receive(:probability).and_return 0.5
 
         ProbabilityTestClass::BatchBuilder.new(@instance,[:foo]).given(:bar).evaluate
       end
@@ -110,8 +111,8 @@ describe Pest::Function::Probability do
         given = double('GivenDist')
         @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
         @instance.distributions.stub(:[]).with([@v2].to_set).and_return(given)
-        event.stub(:batch_probability).and_return 0.5
-        given.stub(:batch_probability).and_return 0.5
+        event.stub(:probability).and_return 0.5
+        given.stub(:probability).and_return 0.5
 
         ProbabilityTestClass::BatchBuilder.new(@instance,[:foo]).given(:bar).evaluate.should == 1.0
       end
@@ -119,7 +120,7 @@ describe Pest::Function::Probability do
       it "returns Pr event (if no givens)" do
         event = double('EventDist')
         @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
-        event.stub(:batch_probability).and_return 0.5
+        event.stub(:probability).and_return 0.5
 
         ProbabilityTestClass::BatchBuilder.new(@instance,[:foo]).evaluate.should == 0.5
       end
@@ -150,7 +151,7 @@ describe Pest::Function::Probability do
 
       it "sets givens" do
         @builder.given(:bar => 2)
-        @builder.givens.should == {:bar => 2}
+        @builder.givens.should == {@v2 => 2}
       end
 
       it "returns self" do
@@ -162,9 +163,9 @@ describe Pest::Function::Probability do
       end
 
       it "adds to dataset if passed hash" do
-        @builder.given(:bar => 2)
-        @builder.given(:bar => 3, :baz => 4)
-        @builder.givens.should == {:bar => 3, :baz => 4}
+        @builder.given(:foo => 2)
+        @builder.given(:foo => 3, :bar => 4)
+        @builder.givens.should == {@v1 => 3, @v2 => 4}
       end
     end
 

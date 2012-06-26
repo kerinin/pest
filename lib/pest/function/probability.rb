@@ -22,7 +22,7 @@ module Pest::Function
       end
 
       def given(*variables)
-        @givens.merge parse(variables)
+        givens.merge parse(variables)
         self
       end
 
@@ -54,7 +54,9 @@ module Pest::Function
       end
 
       def given(given)
-        givens.merge!(given)
+        given.each_pair do |key, value|
+          givens[estimator.data.to_variable(key, true)] = value
+        end
         self
       end
 
