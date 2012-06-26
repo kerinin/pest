@@ -54,9 +54,9 @@ e = Pest::Estimator::Multinomial.new(data)            # Multinomial estimator
 e = Pest::Estimator::Gaussian.new(data)               # Gaussian mean/varaince ML estimator
 
 # Descriptive Statistical Properties
-e.mode(:foo)                                          # Mode
-e.mean(:foo)                                          # Mean (discrete & continuous only)
-e.median(:foo)                                        # Median (discrete & continuous only)
+#e.mode(:foo)                                          # Mode
+#e.mean(:foo)                                          # Mean (discrete & continuous only)
+#e.median(:foo)                                        # Median (discrete & continuous only)
 # quantile?
 # variance?
 # deviation?
@@ -82,7 +82,7 @@ e.batch_p(:foo).given(:bar).in(test)                  # Conditional probability
 e.batch_p(:foo, :bar).given(:baz, :qux).in(test)      # Moar
 
 # Estimating Cumulative & Interval Probability
-e.probability(:foo).greater_than(:bar).in(test)
-e.p(:foo).greater_than(:bar).less_than(:baz).in(test)
-e.p(:foo).gt(:bar).lt(:baz).given(:qux).in(test)
+#e.probability(:foo).greater_than(:bar).in(test)
+#e.p(:foo).greater_than(:bar).less_than(:baz).in(test)
+#e.p(:foo).gt(:bar).lt(:baz).given(:qux).in(test)
 ```
