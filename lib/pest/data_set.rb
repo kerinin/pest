@@ -3,12 +3,17 @@ module Pest::DataSet
     base.extend(ClassMethods)
   end
 
-  def variables
-    @variables ||= {}
+  attr_accessor :variables, :data
+
+  def initialize(variables = {}, data = nil)
+    @variables = variables
+    @data = data
   end
 
-  def variable_array
-    @variables.values.sort
+  # Should be a hash in the form {:variable_name => Pest::Variable}
+  #
+  def variables
+    @variables ||= {}
   end
 
   def to_hash(*args)
@@ -39,6 +44,24 @@ module Pest::DataSet
 
   def +(other)
     raise NotImplementedError
+  end
+
+  def pick(*args)
+    raise NotImplementedError
+  end
+
+  def to_variable(arg, raise_if_unknown=false)
+    variable = case arg.class.name
+    when 'Pest::Variable'
+      arg
+    when 'String', 'Symbol'
+      variables[arg.to_s] || variables[arg.to_sym] || Pest::Variable.new(:name => arg)
+    end
+
+    if raise_if_unknown and not variables.values.include?(variable)
+      raise ArgumentError, "Variable is not part of this dataset"
+    end
+    variable
   end
 
   module ClassMethods

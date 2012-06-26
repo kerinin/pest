@@ -3,68 +3,83 @@ class Pest::DataSet::Hash
 
   def self.translators
     {
-      File    => :from_file,
       String  => :from_file,
       Symbol  => :from_file
     }
   end
 
-  def self.from_file(file)
-    file = File.open(file.to_s, 'r') if file.kind_of?(String)
-
-    object = Marshal.restore(file)
-
-    if object.kind_of?(::Hash)
-      self.new(object)
-    else
-      raise "File does not seem to contain valid data"
+  def self.from_hash(hash)
+    data_set = new
+    hash.each_pair do |key, value|
+      variable = key.kind_of?(Pest::Variable) ? key : Pest::Variable.new(:name => key)
+      data_set.variables[variable.name] = variable
+      data_set.hash[variable.name] = value
     end
+    data_set
   end
 
   attr_reader :variables, :hash
 
-  def initialize(hash)
-    @hash = hash
-    @variables = {}
-    hash.keys().each do |name|
-      @variables[name] = Pest::Variable.new(:name => name)
-    end
+  def initialize(*args)
+    super *args
+    @hash = {}
+  end
+
+  def data
+    hash.values
   end
 
   def to_hash
-    @hash
-  end
-
-  def data_vectors(variables=nil)
-    VectorEnumerable.new(self,variables)
+    hash
   end
 
   def length
     @hash.values.first.length
   end
 
-  def save(file=nil)
-    file ||= Tempfile.new('pest_hash_dataset')
-    file = File.open(file, 'w') if file.kind_of?(String)
-    Marshal.dump(@hash, file)
+  def [](*args)
+    unless args.any?
+      raise ArgumentError, "Indices not specified"
+    end
+
+    args.map do |arg|
+      subset = self.class.new
+      subset.variables = self.variables
+      variables.each do |var|
+        subset.hash[var.name] = hash[var.name][arg]
+      end
+      subset
+    end.inject(:+)
+ 
   end
 
-  class VectorEnumerable
-    include Enumerable
-
-    def initialize(data_set,variables=nil)
-      @data_set = data_set
-      @variables = variables || @data_set.variables
+  def +(other)
+    unless other.variables == variables
+      raise ArgumentError, "DataSets have different variables"
     end
 
-    def [](i)
-      @variables.map {|var| @data_set.hash[var][i]}
+    union = self.class.new
+    union.variables = variables
+    variables.each do |var|
+      union.hash[var.name] = hash[var.name] + other.hash[var.name]
+    end
+    union
+  end
+
+  def pick(*args)
+    unless args.any?
+      raise ArgumentError, "You didn't specify any variables to pick"
     end
 
-    def each
-      @data_set.hash.values.first.each_index do |i|
-        yield @variables.keys.map {|var| @data_set.hash[var][i]}
-      end
+    picked_variables = args.map do |arg|
+      to_variable(arg, true)
     end
+
+    subset = self.class.new
+    picked_variables.each do |var|
+      subset.variables[var.name] = var
+      subset.hash[var.name] = hash[var.name]
+    end
+    subset
   end
 end

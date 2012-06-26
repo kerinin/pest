@@ -5,6 +5,11 @@ module Pest::Function
     end
     alias :batch_p :batch_probability
 
+    def probability(event={})
+      Builder.new(self, event)
+    end
+    alias :p :probability
+
     class BatchBuilder
       include Pest::Function::Builder
 
@@ -12,7 +17,6 @@ module Pest::Function
 
       def initialize(estimator, variables)
         @estimator      = estimator
-        @data_source    = data_source
         @event          = parse(variables)
         @givens         = [].to_set
       end
@@ -35,6 +39,28 @@ module Pest::Function
           conditional = estimator.distributions[givens].batch_probability(data_source)
           joint / conditional
         end
+      end
+    end
+
+    class Builder
+      include Pest::Function::Builder
+
+      attr_accessor :estimator, :event, :givens
+
+      def initialize(estimator, event)
+        @estimator    = estimator
+        @event        = event
+        @givens       = Hash.new
+      end
+
+      def given(given)
+        givens.merge!(given)
+        self
+      end
+
+      def evaluate
+        data = Pest::DataSet::Hash.new(event.merge(givens))
+        BatchBuilder.new(estimator, event.keys).given(*givens.keys).in(data)
       end
     end
   end

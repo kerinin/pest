@@ -31,7 +31,7 @@ describe Pest::DataSet::NArray do
 
   describe "::from_hash" do
     before(:each) do
-      @matrix = NArray.to_na [[4,5,6],[1,2,3]]
+      @matrix = NArray.to_na [[1,2,3],[4,5,6]]
     end
 
     it "creates a NArray" do
@@ -60,7 +60,7 @@ describe Pest::DataSet::NArray do
 
     it "creates variables from first line" do
       @instance = @class.from_csv @file.path
-      @instance.variable_array.map(&:name).should == ["bar", "foo"]
+      @instance.variables.values.map(&:name).should == ["foo", "bar"]
     end
 
     it "creates data from the rest" do
@@ -101,53 +101,26 @@ describe Pest::DataSet::NArray do
     end
 
     it "sets values" do
-      @instance.to_hash.values.should == [[4,5,6],[1,2,3]]
+      @instance.to_hash.values.should == [[1,2,3],[4,5,6]]
     end
   end
 
-  describe "#data_vectors" do
+  describe "#pick" do
     before(:each) do
       @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
     end
 
-    it "returns an enumerable" do
-      @instance.data_vectors.should be_a(Enumerable)
-    end
-
-    it "slices" do
-      # NOTE: This is returning an array - probably could be more efficient
-      @instance.data_vectors.first.should == [4,1]
-    end
-
-    it "accepts a single variable string" do
-      @instance.data_vectors(:foo).first.should == [1]
+    it "accepts a single symbol string" do
+      @instance.pick(:foo).data.to_a.first.should == [1,2,3]
     end
 
     it "accepts a single variable" do
-      @instance.data_vectors(@v1).first.should == [1]
+      @instance.pick(@v1).data.to_a.first.should == [1,2,3]
     end
 
     it "accepts multiple variables" do
-      @instance.data_vectors(:foo, :bar).first.should == [1,4]
-    end
-  end
-
-  describe "#save" do
-    before(:each) do
-      @file = Tempfile.new('test')
-      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
-    end
-
-    it "saves to file" do
-      @instance.save(@file)
-      @class.from_file(@file.path).should == @instance
-    end
-
-    it "saves to tmp dir if no filename specified" do
-      Tempfile.should_receive(:new).and_return(@file)
-      @instance.save
-      @class.from_file(@file.path).should == @instance
-    end
+      @instance.pick(:bar, :foo).data.to_a.should == [[4,5,6],[1,2,3]]
+   end
   end
 
   describe "#[]" do

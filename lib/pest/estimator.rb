@@ -39,6 +39,10 @@ module Pest::Estimator
     def batch_probability
       raise NotImplementedError
     end
+
+    def probability
+      raise NotImplementedError
+    end
   end
 
   class DistributionList < Hash

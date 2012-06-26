@@ -5,55 +5,44 @@ require 'spec_helper'
 # conflated
 
 describe Pest::DataSet::Hash do
-  context "class methods" do
-    before(:each) do
-      @class = Pest::DataSet::Hash
+  before(:each) do
+    @class = Pest::DataSet::Hash
+  end
+
+  describe "::translators" do
+    it "maps String => from_file" do
+      @class.translators[String].should == :from_file
     end
 
-    describe "::translators" do
-      it "maps File => from_file" do
-        @class.translators[File].should == :from_file
-      end
+    it "maps Symbol => from_file" do
+      @class.translators[Symbol].should == :from_file
+    end
+  end
 
-      it "maps String => from_file" do
-        @class.translators[String].should == :from_file
-      end
-
-      it "maps Symbol => from_file" do
-        @class.translators[Symbol].should == :from_file
-      end
+  describe "::from_hash" do
+    it "parses symbol keys into variables" do
+      @instance = Pest::DataSet::Hash.from_hash(:foo => [1,2,3], :bar => [3,4,5])
+      @instance.variables.keys.should == [:foo, :bar]
     end
 
-    describe "::from_file" do
-      before(:each) do
-        file = File.open(__FILE__, 'r')
-        File.stub(:open).with('foo', 'r').and_return(file)
-        Marshal.stub(:restore).with(file).and_return({:foo => 1})
-      end
-
-      it "looks for file if passed string" do
-        File.should_receive(:open).with('foo', 'r')
-        @class.from_file('foo')
-      end
-
-      it "unmarshals" do
-        Marshal.should_receive(:restore)
-        @class.from_file('foo')
-      end
-
-      it "sets variables" do
-        @class.from_file('foo').variables.length.should == 1
-      end
-
-      it "generates variables" do
-        @class.from_file('foo').variables[:foo].should be_a(Pest::Variable)
-      end
+    it "retains variable names if passed" do
+      @v1 = Pest::Variable.new(:name => :foo)
+      @v2 = Pest::Variable.new(:name => :bar)
+      @instance = Pest::DataSet::Hash.from_hash(@v1 => [1,2,3], @v2 => [3,4,5])
+      @instance.variables.keys.should == [:foo, :bar]
+    end
+    
+    it "retains variables if passed" do
+      @v1 = Pest::Variable.new(:name => :foo)
+      @v2 = Pest::Variable.new(:name => :bar)
+      @instance = Pest::DataSet::Hash.from_hash(@v1 => [1,2,3], @v2 => [3,4,5])
+      @instance.variables.values.should == [@v1, @v2]
     end
   end
 
   before(:each) do
     @data = {:foo => [1,2,3], :bar => [3,4,5]}
-    @instance = Pest::DataSet::Hash.new(@data)
+    @instance = Pest::DataSet::Hash.from_hash(@data)
   end
 
   describe "#to_hash" do
@@ -62,43 +51,30 @@ describe Pest::DataSet::Hash do
     end
   end
 
-  describe "#data_vectors" do
-    it "returns an enumerable" do
-      @instance.data_vectors.should be_a(Enumerable)
-    end
-
-    it "formats data as a list of rows" do
-      @instance.data_vectors.first.should == [1,3]
-    end
-  end
-
-  describe "#save" do
+  describe "#pick" do
     before(:each) do
-      @file = File.open(__FILE__, 'r')
-      File.stub(:open).with('foo', 'w').and_return(@file)
-      Marshal.stub(:dump)
+      @v1 = Pest::Variable.new(:name => :foo)
+      @v2 = Pest::Variable.new(:name => :bar)
+      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
     end
 
-    it "marshals to file from path" do
-      Marshal.should_receive(:dump).with(@data, @file)
-      @instance.save('foo')
+    it "accepts a single symbol string" do
+      @instance.pick(:foo).data.to_a.first.should == [1,2,3]
     end
 
-    it "marshals to file from file" do
-      Marshal.should_receive(:dump).with(@data, @file)
-      @instance.save(@file)
+    it "accepts a single variable" do
+      @instance.pick(@v1).data.to_a.first.should == [1,2,3]
     end
 
-    it "saves to tmp dir if no filename specified" do
-      File.should_receive(:open).with(/pest_hash_dataset/, anything(), anything()).and_return(@file)
-      @instance.save
-    end
+    it "accepts multiple variables" do
+      @instance.pick(:bar, :foo).data.to_a.should == [[4,5,6],[1,2,3]]
+   end
   end
 
   describe "#length" do
     before(:each) do
       @data = {:foo => [1,2,3], :bar => [3,4,5]}
-      @instance = Pest::DataSet::Hash.new(@data)
+      @instance = Pest::DataSet::Hash.from_hash(@data)
     end
 
     it "delegates to hash" do
