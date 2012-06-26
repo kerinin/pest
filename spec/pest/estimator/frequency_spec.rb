@@ -15,7 +15,7 @@ describe Pest::Estimator::Frequency do
   end
 
   it "generates marginal probabilities" do
-    @instance.p(@v2 => [1]).should == 1.0
+    @instance.p(@v2 => 1).should == 1.0
   end
 
   it "generates joint probability" do
@@ -55,23 +55,17 @@ describe Pest::Estimator::Frequency do
       end
     end
 
-    describe "#batch_probability" do
-      it "returns an NArray" do
-        @dist.batch_probability(@test).should be_a(NArray)
-      end
-
-      it "calculates vector frequency / dataset length"  do
-        @dist.batch_probability(@test).should == NArray[[0.5,0.25,0]]        
-      end
-    end
-
     describe "#probability" do
+      before(:each) do
+        @test = Pest::DataSet::Hash.from_hash(@v1 => [1], @v2 => [1])
+      end
+
       it "returns an float" do
-        @dist.probability(@v1 => 1, @v2 => 1).should be_a(NArray)
+        @dist.probability(@test).should be_a(NArray)
       end
 
       it "calculates frequency / dataset length"  do
-        @dist.probability(@v1 => 1, @v2 => 1).should == 0.5
+        @dist.probability(@test).to_a.should == [0.5]
       end
     end
     

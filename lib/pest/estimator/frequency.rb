@@ -17,25 +17,25 @@ class Pest::Estimator::Frequency
     def cache_model
       if @frequencies.nil?
         @frequencies = Hash.new(0)
-        @estimator.data.data_vectors(*variable_array).each do |vector|
+        @estimator.data.pick(*variable_array).each do |vector|
           # Make sure this vector is consistently ordered
           @frequencies[vector] += 1
         end
       end
     end
 
-    def batch_probability(data)
+    def probability(data)
       cache_model
 
-      NArray[ data.data_vectors(*variable_array).map do |vector|
+      NArray[ data.pick(*variable_array).map do |vector|
         @frequencies[vector].to_f
-      end ] / @estimator.data.length
+      end ].reshape!(data.length) / @estimator.data.length
     end
 
     def entropy
       cache_model
 
-      probabilities = batch_probability(unique_event_dataset)
+      probabilities = probability(unique_event_dataset)
 
       (-probabilities * NMath.log2(probabilities)).sum
     end

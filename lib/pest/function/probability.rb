@@ -32,11 +32,11 @@ module Pest::Function
       end
 
       def evaluate
-        joint = estimator.distributions[event].batch_probability(data_source)
+        joint = estimator.distributions[event].probability(data_source)
         if givens.empty?
           joint
         else
-          conditional = estimator.distributions[givens].batch_probability(data_source)
+          conditional = estimator.distributions[givens].probability(data_source)
           joint / conditional
         end
       end
