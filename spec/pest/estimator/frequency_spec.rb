@@ -27,15 +27,15 @@ describe Pest::Estimator::Frequency do
   end
 
   it "generates marginal batch_probabilities" do
-    @instance.batch_p(@v2).in(@test).should === NArray[[1.0, 1.0, 1.0]]
+    @instance.batch_p(@v2).in(@test).should == [1.0, 1.0, 1.0]
   end
 
   it "generates joint batch_probability" do
-    @instance.batch_p(@v1, @v2).in(@test).should == NArray[[0.5, 0.25, 0]]
+    @instance.batch_p(@v1, @v2).in(@test).should == [0.5, 0.25, 0]
   end
 
   it "generates conditional batch_probability" do
-    @instance.batch_p(@v1).given(@v2).in(@test).should == NArray[[0.5, 0.25, 0]]
+    @instance.batch_p(@v1).given(@v2).in(@test).should == [0.5, 0.25, 0]
   end
 
   describe Pest::Estimator::Frequency::Distribution do

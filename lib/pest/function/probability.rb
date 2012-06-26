@@ -34,10 +34,10 @@ module Pest::Function
       def evaluate
         joint = estimator.distributions[event].probability(data_source)
         if givens.empty?
-          joint
+          joint.to_a
         else
           conditional = estimator.distributions[givens].probability(data_source)
-          joint / conditional
+          (joint / conditional).to_a
         end
       end
     end
@@ -61,8 +61,13 @@ module Pest::Function
       end
 
       def evaluate
-        data = Pest::DataSet::Hash.new(event.merge(givens))
-        BatchBuilder.new(estimator, event.keys).given(*givens.keys).in(data)
+        data_hash = event.merge(givens)
+        data_hash.each_key {|key| data_hash[key] = Array(data_hash[key])}
+
+        data = Pest::DataSet::Hash.from_hash(data_hash)
+        BatchBuilder.new(estimator, event.keys).
+          given(*givens.keys).in(data).
+          evaluate.first
       end
     end
   end
