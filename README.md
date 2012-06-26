@@ -2,18 +2,10 @@
 
 [![Build Status](https://secure.travis-ci.org/kerinin/pest.png)](http://travis-ci.org/kerinin/pest)
 
+**A concise API focused on painless investigation of data sets**
 
-Pest provides a unified framework for interacting with different probability
-estimation models.  
-
-* Pest tries to be agnostic about the underlying data data structures, 
-so changing libraries (GSL -> Hadoop) is as simple as using a different data source.
-* Pest is designed to create estimators using subsets of larger data sources, and
-transparently constructs estimators to facilitate dynamic querying
-* Implementing custom estimation models is easy, and Pest implements some model
-common ones for you.
-
-Pest abstracts common statstical operations including:
+Pest provides a framework for interacting with different probability
+estimation models. Pest abstracts common statstical operations including:
 
 * Marginal, Joint and Conditional point probability
 * Interval and Cumulative probability
@@ -21,24 +13,34 @@ Pest abstracts common statstical operations including:
 * Mean, Median, Mode, etc
 
 
-## Ruby Install
+**Scalability if you need it**
 
-``` sh
-brew install gnuplot  # This may take awhile...
-cd /usr/local
-git checkout 83ed494 /usr/local/Library/Formula/gsl.rb
-brew install gsl      # Forcing gsl v1.4
+Pest tries to be agnostic about the underlying data data structures, 
+so changing libraries (NArray -> Hadoop) is as simple as using a different data source.
+Pest is designed to create estimators using subsets of larger data sources, and
+transparently constructs estimators to facilitate dynamic querying
 
-bundle install 
-```
+
+**Code structure designed to be extended**
+
+Implementing custom estimation models is easy, and Pest implements some model
+common ones for you.
+
+
+## Install
+
+Add it to your Gemfile and bundle
+
+    gem "pest"
+
+    bundle install 
 
 ## API
 
 ``` ruby
 # Creating Datasets
-test = Pest::DataSet::Hash.new hash                   # Creates a Hash dataset of observations from a hash
-test = Pest::DataSet::Hash.new file                   # Creates a Hash dataset of observations from an IO (Marshalled) 
-train = Pest::DataSet::GSL.new file                   # Creates a GSL dataset from and IO instance
+test = Pest::DataSet::Hash.from_hash hash             # Creates a Hash dataset of observations from a hash
+train = Pest::DataSet::NArray.from_hash hash          # Creates a NArray dataset
 
 # DataSet Variables
 test.variables                                        # hash of Variable instances detected in observation set
@@ -47,8 +49,9 @@ test.v[:foo]                                          # a specific variable
 test.v[:foo] = another_variable                       # explicit declaration
 
 # Creating Estimators
-e = Pest::Estimator::Set::Multinomial.new(test)       # Creates a multinomial estimator for set o
-e = Pest::Estimator::Discrete::Gaussian.new(file)     # Creating an estimator with the DataSet API
+e = Pest::Estimator::Frequency.new(data)              # Frequentist estimator - values treated as unordered set
+e = Pest::Estimator::Multinomial.new(data)            # Multinomial estimator
+e = Pest::Estimator::Gaussian.new(data)               # Gaussian mean/varaince ML estimator
 
 # Descriptive Statistical Properties
 e.mode(:foo)                                          # Mode
@@ -66,7 +69,7 @@ e.mutual_information(:foo, :bar)                      # Mutual information of 'f
 e.i(:foo, :bar)                                       # Alias
 
 # Estimating Point Probability
-e.probability(o.variables[:foo] => 1)                 # Estimate the probability that foo=1
+e.probability(e.variables[:foo] => 1)                 # Estimate the probability that foo=1
 e.p(:foo => 1)                                        # Same as above, tries to find a variable named 'foo'
 e.p(:foo => 1, :bar => 2)                             # Estimate the probability that foo=1 AND bar=2
 e.p(:foo => 1).given(:bar => 2)                       # Estimate the probability that foo=1 given bar=2
@@ -83,10 +86,3 @@ e.probability(:foo).greater_than(:bar).in(test)
 e.p(:foo).greater_than(:bar).less_than(:baz).in(test)
 e.p(:foo).gt(:bar).lt(:baz).given(:qux).in(test)
 ```
-
-## Working Notes
-
-Do we want variable equality to be name-based?  It may make more sense to allow
-variables named differently in different data sets to be equivalent. And how the
-fuck do we handle variable type?  I'm almost thinking we don't, and let the actual
-estimators take care of type casting

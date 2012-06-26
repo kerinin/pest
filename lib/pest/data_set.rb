@@ -17,6 +17,7 @@ module Pest::DataSet
   def variables
     @variables ||= {}
   end
+  alias :v :variables
 
   def to_hash(*args)
     raise NotImplementedError
