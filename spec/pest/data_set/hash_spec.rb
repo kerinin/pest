@@ -8,6 +8,7 @@ describe Pest::DataSet::Hash do
   before(:each) do
     @v1 = Pest::Variable.new(:name => :foo)
     @v2 = Pest::Variable.new(:name => :bar)
+    @v3 = Pest::Variable.new(:name => :baz)
     @class = Pest::DataSet::Hash
   end
 
@@ -89,6 +90,40 @@ describe Pest::DataSet::Hash do
       block.should_receive(:yielding).with([2,5])
       block.should_receive(:yielding).with([3,6])
       @instance.each {|i| block.yielding(i)}
+    end
+  end
+
+  describe "#merge" do
+    before(:each) do
+      @other    = @class.from_hash @v1 => [10,11,12,13], @v3 => [1,2,3,4]
+      @instance = @class.from_hash @v1 => [1,2,3,4], @v2 => [5,6,7,8]
+    end
+
+    it "accepts a dataset and returns dataset" do
+      @instance.merge(@other).should be_a(@class)
+    end
+
+    it "accepts a hash and returns dataset" do
+      @instance.merge(@v1 => [10,11,12,13], @v3 => [1,2,3,4]).should be_a(@class)
+    end
+
+    it "requires the dataset to have the same length" do
+      expect { @instance.merge(@v1 => [1,2,3,4,5]) }.to raise_error(ArgumentError)
+    end
+
+    it "adds the passed variable to self" do
+      @instance.merge(@other)
+      @instance.variables.values.should include(@v3)
+    end
+
+    it "adds the passed data to self" do
+      @instance.merge(@other)
+      @instance.pick(@v3).to_a.flatten.should == [1,2,3,4]
+    end
+
+    it "over-writes variables in self with variables in other" do
+      @instance.merge(@other)
+      @instance.pick(@v1).to_a.flatten.should == [10,11,12,13]
     end
   end
 end

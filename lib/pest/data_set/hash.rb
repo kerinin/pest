@@ -88,4 +88,14 @@ class Pest::DataSet::Hash
       yield variables.keys.map {|key| hash[key][i]}
     end
   end
+
+  def merge(other)
+    other = self.class.from_hash(other) if other.kind_of?(::Hash)
+    raise ArgumentError, "Lengths must be the same" if other.length != length
+
+    variables.merge! other.variables
+    hash.merge! other.hash
+
+    self
+  end
 end
