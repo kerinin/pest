@@ -57,6 +57,10 @@ module Pest::DataSet
     raise NotImplementedError
   end
 
+  def merge(other)
+    raise NotImplementedError
+  end
+
   def to_variable(arg, raise_if_unknown=false)
     variable = case arg.class.name
     when 'Pest::Variable'

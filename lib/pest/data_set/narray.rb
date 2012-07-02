@@ -107,4 +107,29 @@ class Pest::DataSet::NArray
       yield data[i,true].transpose.to_a.first
     end
   end
+
+  def merge(other)
+    other = self.class.from_hash(other) if other.kind_of?(::Hash)
+    raise ArgumentError, "Lengths must be the same" if other.length != length
+
+    # Merge the variables.  Existing variables should be updated,
+    # new variables should be appended to the hash in the same order
+    # as they appear in other
+    variables.merge! other.variables
+
+    # Create the new data array, should be the size of the merged variables
+    # by the number of vectors
+    new_data = ::NArray.sfloat(length, variables.length)
+
+    # Copy over the data from self (as if we had extended self.data to the
+    # right to allow for the new data)
+    new_data[true, 0..data.shape[1]-1] = data
+
+    # Merge in other's data, using the indices of other's variables as the
+    # slice keys
+    new_data[true, other.variables.values.map{|v| variables.values.index(v)}] = other.data
+
+    self.data = new_data
+    self
+  end
 end

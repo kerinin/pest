@@ -121,4 +121,10 @@ describe Pest::DataSet do
       expect { @instance.each {} }.to raise_error(NotImplementedError)
     end
   end
+
+  describe "#merge" do
+    it "returns NotImplementedError" do
+      expect { @instance.merge(@instance) }.to raise_error(NotImplementedError)
+    end
+  end
 end
