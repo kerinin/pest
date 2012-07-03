@@ -119,7 +119,7 @@ class Pest::DataSet::NArray
 
     # Create the new data array, should be the size of the merged variables
     # by the number of vectors
-    new_data = ::NArray.sfloat(length, variables.length)
+    new_data = ::NArray.object(length, variables.length)
 
     # Copy over the data from self (as if we had extended self.data to the
     # right to allow for the new data)
