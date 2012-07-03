@@ -28,7 +28,7 @@ class Pest::Estimator::Frequency
       cache_model
 
       array = NArray[ data.pick(*variable_array).map do |vector|
-        @frequencies[Array(vector)].to_f
+        1 + @frequencies[Array(vector)].to_f
       end ]
       array.reshape!(data.length) / @estimator.data.length
     end
