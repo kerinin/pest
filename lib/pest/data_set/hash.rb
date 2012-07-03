@@ -89,7 +89,18 @@ class Pest::DataSet::Hash
     end
   end
 
+  def dup
+    instance = self.class.new
+    instance.variables = variables.dup
+    instance.hash = hash.dup
+    instance
+  end
+
   def merge(other)
+    dup.merge!(other)
+  end
+
+  def merge!(other)
     other = self.class.from_hash(other) if other.kind_of?(::Hash)
     raise ArgumentError, "Lengths must be the same" if other.length != length
 

@@ -68,6 +68,7 @@ class Pest::DataSet::NArray
     end.inject(:+)
   end
 
+
   # Return the union of self and other
   #
   def +(other)
@@ -97,7 +98,8 @@ class Pest::DataSet::NArray
     end
 
     subset = self.class.new
-    subset.variables =  picked_variables
+    subset.variables = {}
+    picked_variables.each {|v| subset.variables[v.name] = v}
     subset.data = self.data[true, picked_indices]
     subset
   end
@@ -108,7 +110,18 @@ class Pest::DataSet::NArray
     end
   end
 
+  def dup
+    instance = self.class.new
+    instance.variables = variables.dup
+    instance.data = data.dup
+    instance
+  end
+
   def merge(other)
+    dup.merge!(other)
+  end
+
+  def merge!(other)
     other = self.class.from_hash(other) if other.kind_of?(::Hash)
     raise ArgumentError, "Lengths must be the same" if other.length != length
 

@@ -45,6 +45,19 @@ module Pest::DataSet
     raise NotImplementedError
   end
 
+  def except(start, finish)
+    left = start > 0 ? self[0..start] : nil
+    right = finish < length - 1 ? self[finish..-1] : nil
+    case [left.nil?, right.nil?]
+    when [true, false]
+      right
+    when [false, true]
+      left
+    when [false, false]
+      right + left
+    end
+  end
+
   def +(other)
     raise NotImplementedError
   end

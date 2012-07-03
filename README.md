@@ -86,3 +86,7 @@ e.batch_p(:foo, :bar).given(:baz, :qux).in(test)      # Moar
 #e.p(:foo).greater_than(:bar).less_than(:baz).in(test)
 #e.p(:foo).gt(:bar).lt(:baz).given(:qux).in(test)
 ```
+
+## TODO
+
+the builders should validate the variables they're given and throw errors if they're not part of the estimators data

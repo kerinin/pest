@@ -93,6 +93,16 @@ describe Pest::DataSet::Hash do
     end
   end
 
+  describe "#map" do
+    before(:each) do
+      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+    end
+
+    it "works" do
+      @instance.map {|i| i}.should == [[1,4],[2,5],[3,6]]
+    end
+  end
+
   describe "#merge" do
     before(:each) do
       @other    = @class.from_hash @v1 => [10,11,12,13], @v3 => [1,2,3,4]

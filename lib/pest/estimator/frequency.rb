@@ -19,7 +19,7 @@ class Pest::Estimator::Frequency
         @frequencies = Hash.new(0)
         @estimator.data.pick(*variable_array).each do |vector|
           # Make sure this vector is consistently ordered
-          @frequencies[vector] += 1
+          @frequencies[Array(vector)] += 1
         end
       end
     end
@@ -27,9 +27,10 @@ class Pest::Estimator::Frequency
     def probability(data)
       cache_model
 
-      NArray[ data.pick(*variable_array).map do |vector|
-        @frequencies[vector].to_f
-      end ].reshape!(data.length) / @estimator.data.length
+      array = NArray[ data.pick(*variable_array).map do |vector|
+        @frequencies[Array(vector)].to_f
+      end ]
+      array.reshape!(data.length) / @estimator.data.length
     end
 
     def entropy
