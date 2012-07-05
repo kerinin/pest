@@ -9,11 +9,11 @@ class Pest::Variable
 
   def initialize(args={})
     @name = args[:name]
-    @uuid = args[:uuid] || UUIDTools::UUID.random_create
+    @uuid = args[:uuid] || UUIDTools::UUID.random_create.to_s
   end
 
   def identifier
-    "#{name}:#{uuid}"
+    @identifier ||= "#{name}:#{uuid}"
   end
   alias :serialize :identifier
 
