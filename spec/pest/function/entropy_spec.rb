@@ -7,11 +7,8 @@ end
 
 describe Pest::Function::Entropy do
   before(:each) do
-    @v1 = Pest::Variable.new(:name => :foo)
-    @v2 = Pest::Variable.new(:name => :bar)
-    @v3 = Pest::Variable.new(:name => :baz)
     @instance = EntropyTestClass.new
-    @instance.stub(:variables).and_return({:foo => @v1, :bar => @v2})
+    @instance.stub(:variables).and_return([:foo, :bar].to_set)
   end
 
   describe "#entropy" do
@@ -26,18 +23,18 @@ describe Pest::Function::Entropy do
 
   describe Pest::Function::Entropy::Builder do
     describe "::new" do
-      before(:each) { @builder = EntropyTestClass::Builder.new(@instance, [@v1, :bar]) }
+      before(:each) { @builder = EntropyTestClass::Builder.new(@instance, [:foo, :bar]) }
 
       it "sets estimator" do
         @builder.estimator.should == @instance
       end
 
       it "sets event" do
-        @builder.event.should == [@v1, @v2].to_set
+        @builder.event.should == [:foo, :bar].to_set
       end
 
       it "fails if variable undefined for estimator" do
-        lambda { EntropyTestClass::Builder.new(@instance, [@v1, @v3]) }.should raise_error(ArgumentError)
+        lambda { EntropyTestClass::Builder.new(@instance, [:foo, :baz]) }.should raise_error(ArgumentError)
       end
 
       it "constructs dataset if passed hash"
@@ -48,7 +45,7 @@ describe Pest::Function::Entropy do
 
       it "sets givens" do
         @builder.given(:bar)
-        @builder.givens.should include(@v2)
+        @builder.givens.should include(:bar)
       end
 
       it "returns self" do
@@ -69,7 +66,7 @@ describe Pest::Function::Entropy do
 
       it "gets entropy of event" do
         event = double('EntropyEventDist')
-        @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
+        @instance.distributions.stub(:[]).with([:foo].to_set).and_return(event)
         event.should_receive(:entropy).and_return 0.5
 
         EntropyTestClass::Builder.new(@instance,[:foo]).evaluate
@@ -78,8 +75,8 @@ describe Pest::Function::Entropy do
       it "gets entropy of givens" do
         event = double("EntropyEventDist", :entropy => 0.5)
         given = double("EntropyGivenDist", :entropy => 0.25)
-        @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
-        @instance.distributions.stub(:[]).with([@v2].to_set).and_return(given)
+        @instance.distributions.stub(:[]).with([:foo].to_set).and_return(event)
+        @instance.distributions.stub(:[]).with([:bar].to_set).and_return(given)
         given.should_receive(:entropy).and_return 0.25
 
         EntropyTestClass::Builder.new(@instance,[:foo]).given(:bar).evaluate
@@ -88,15 +85,15 @@ describe Pest::Function::Entropy do
       it "returns H event - givens (if givens)" do
         event = double("EntropyEventDist", :entropy => 0.5)
         given = double("EntropyGivenDist", :entropy => 0.1)
-        @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
-        @instance.distributions.stub(:[]).with([@v2].to_set).and_return(given)
+        @instance.distributions.stub(:[]).with([:foo].to_set).and_return(event)
+        @instance.distributions.stub(:[]).with([:bar].to_set).and_return(given)
 
         EntropyTestClass::Builder.new(@instance,[:foo]).given(:bar).evaluate.should == 0.4
       end
 
       it "returns H event (if no givens)" do
         event = double("EntropyEventDist", :entropy => 0.5)
-        @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
+        @instance.distributions.stub(:[]).with([:foo].to_set).and_return(event)
 
         EntropyTestClass::Builder.new(@instance,[:foo]).evaluate.should == 0.5
       end

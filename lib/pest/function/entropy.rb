@@ -12,12 +12,14 @@ module Pest::Function
 
       def initialize(estimator, variables)
         @estimator      = estimator
-        @event          = parse(variables)
-        @givens         = [].to_set
+        @event          = variables.to_set
+        @givens         = Set.new
+        raise ArgumentError unless (@event - @estimator.variables).empty?
       end
 
       def given(*variables)
-        @givens.merge parse(variables)
+        @givens.merge variables.to_set
+        raise ArgumentError unless (@givens - @estimator.variables).empty?
         self
       end
 

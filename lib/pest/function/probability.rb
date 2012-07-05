@@ -17,12 +17,14 @@ module Pest::Function
 
       def initialize(estimator, variables)
         @estimator      = estimator
-        @event          = parse(variables)
+        @event          = variables.to_set
         @givens         = [].to_set
+        raise ArgumentError unless (@event - @estimator.variables).empty?
       end
 
       def given(*variables)
-        givens.merge parse(variables)
+        @givens += variables
+        raise ArgumentError unless (@givens - @estimator.variables).empty?
         self
       end
 
@@ -33,10 +35,10 @@ module Pest::Function
 
       def evaluate
         if givens.empty?
-          estimator.distributions[event].probability(data_source).to_a
+          estimator.distributions[*event].probability(data_source).to_a
         else
-          joint = estimator.distributions[ event + givens ].probability(data_source)
-          conditional = estimator.distributions[givens].probability(data_source)
+          joint = estimator.distributions[*(event + givens)].probability(data_source)
+          conditional = estimator.distributions[*givens].probability(data_source)
 
           (joint / conditional).to_a
         end
@@ -55,9 +57,8 @@ module Pest::Function
       end
 
       def given(given)
-        given.each_pair do |key, value|
-          givens[estimator.data.to_variable(key, true)] = value
-        end
+        givens.merge! given
+        raise ArgumentError unless (given.keys.to_set - @estimator.variables).empty?
         self
       end
 

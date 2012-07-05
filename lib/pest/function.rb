@@ -17,12 +17,5 @@ module Pest::Function
         evaluate.send(f, *args)
       end
     end
-
-    private
-
-    def parse(variables)
-      variables.map {|arg| estimator.to_variable(arg) }.to_set
-    end
-
   end
 end

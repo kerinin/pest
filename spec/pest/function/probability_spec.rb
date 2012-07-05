@@ -7,12 +7,9 @@ end
 
 describe Pest::Function::Probability do
   before(:each) do
-    @v1 = Pest::Variable.new(:name => :foo)
-    @v2 = Pest::Variable.new(:name => :bar)
-    @v3 = Pest::Variable.new(:name => :baz)
     @instance = ProbabilityTestClass.new
-    @instance.stub(:data).and_return(Pest::DataSet::Hash.from_hash(@v1 => [1], @v2 => [1]))
-    @instance.stub(:variables).and_return({:foo => @v1, :bar => @v2})
+    @instance.stub(:data).and_return(Pest::DataSet::Hash.from_hash(:foo => [1], :bar => [1]))
+    @instance.stub(:variables).and_return([:foo,:bar].to_set)
   end
 
   describe "#batch_probability" do
@@ -37,18 +34,18 @@ describe Pest::Function::Probability do
 
   describe Pest::Function::Probability::BatchBuilder do
     describe "::new" do
-      before(:each) { @builder = ProbabilityTestClass::BatchBuilder.new(@instance, [@v1, :bar]) }
+      before(:each) { @builder = ProbabilityTestClass::BatchBuilder.new(@instance, [:foo, :bar]) }
 
       it "sets estimator" do
         @builder.estimator.should == @instance
       end
 
       it "sets event" do
-        @builder.event.should == [@v1, @v2].to_set
+        @builder.event.should == [:foo, :bar].to_set
       end
 
       it "fails if variable undefined for estimator" do
-        lambda { ProbabilityTestClass::BatchBuilder.new(@instance, [@v1, @v3]) }.should raise_error(ArgumentError)
+        lambda { ProbabilityTestClass::BatchBuilder.new(@instance, [:foo, :baz]) }.should raise_error(ArgumentError)
       end
 
       it "constructs dataset if passed hash"
@@ -59,7 +56,7 @@ describe Pest::Function::Probability do
 
       it "sets givens" do
         @builder.given(:bar)
-        @builder.givens.should include(@v2)
+        @builder.givens.should include(:bar)
       end
 
       it "returns self" do
@@ -89,7 +86,7 @@ describe Pest::Function::Probability do
 
       it "gets probability of event" do
         event = double('EventDist')
-        @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
+        @instance.distributions.stub(:[]).with(:foo).and_return(event)
         event.should_receive(:probability).and_return NArray[0.5]
 
         ProbabilityTestClass::BatchBuilder.new(@instance,[:foo]).evaluate
@@ -98,8 +95,8 @@ describe Pest::Function::Probability do
       it "gets probability of givens" do
         event = double('EventDist')
         given = double('GivenDist')
-        @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
-        @instance.distributions.stub(:[]).with([@v2].to_set).and_return(given)
+        @instance.distributions.stub(:[]).with(:foo, :bar).and_return(event)
+        @instance.distributions.stub(:[]).with(:bar).and_return(given)
         event.stub(:probability).and_return NArray[0.5]
         given.should_receive(:probability).and_return NArray[0.5]
 
@@ -109,8 +106,8 @@ describe Pest::Function::Probability do
       it "returns Pr event / givens (if givens)" do
         event = double('EventDist')
         given = double('GivenDist')
-        @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
-        @instance.distributions.stub(:[]).with([@v2].to_set).and_return(given)
+        @instance.distributions.stub(:[]).with(:foo, :bar).and_return(event)
+        @instance.distributions.stub(:[]).with(:bar).and_return(given)
         event.stub(:probability).and_return NArray[0.5]
         given.stub(:probability).and_return NArray[0.5]
 
@@ -119,7 +116,7 @@ describe Pest::Function::Probability do
 
       it "returns Pr event (if no givens)" do
         event = double('EventDist')
-        @instance.distributions.stub(:[]).with([@v1].to_set).and_return(event)
+        @instance.distributions.stub(:[]).with(:foo).and_return(event)
         event.stub(:probability).and_return NArray[0.5]
 
         ProbabilityTestClass::BatchBuilder.new(@instance,[:foo]).evaluate.should == [0.5]
@@ -129,7 +126,7 @@ describe Pest::Function::Probability do
 
   describe Pest::Function::Probability::Builder do
     describe "::new" do
-      before(:each) { @builder = ProbabilityTestClass::Builder.new(@instance, [@v1, :bar]) }
+      before(:each) { @builder = ProbabilityTestClass::Builder.new(@instance, [:foo, :bar]) }
 
       it "sets estimator" do
         @builder.estimator.should == @instance
@@ -137,12 +134,12 @@ describe Pest::Function::Probability do
 
       it "sets event" do
         pending "do you need this?"
-        @builder.event.should == [@v1, @v2].to_set
+        @builder.event.should == [:foo, :bar].to_set
       end
 
       it "fails if variable undefined for estimator" do
         pending "do you need this?"
-        lambda { ProbabilityTestClass::Builder.new(@instance, [@v1, @v3]) }.should raise_error(ArgumentError)
+        lambda { ProbabilityTestClass::Builder.new(@instance, [:foo, :baz]) }.should raise_error(ArgumentError)
       end
     end
 
@@ -151,7 +148,7 @@ describe Pest::Function::Probability do
 
       it "sets givens" do
         @builder.given(:bar => 2)
-        @builder.givens.should == {@v2 => 2}
+        @builder.givens.should == {:bar => 2}
       end
 
       it "returns self" do
@@ -165,7 +162,7 @@ describe Pest::Function::Probability do
       it "adds to dataset if passed hash" do
         @builder.given(:foo => 2)
         @builder.given(:foo => 3, :bar => 4)
-        @builder.givens.should == {@v1 => 3, @v2 => 4}
+        @builder.givens.should == {:foo => 3, :bar => 4}
       end
     end
 

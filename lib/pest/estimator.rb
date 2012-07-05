@@ -39,22 +39,10 @@ module Pest::Estimator
       @estimator = estimator
     end
 
-    def parse_args(args)
-      set = if args.kind_of? Array
-        args.flatten.to_set
-      elsif args.kind_of? ::Set
-        args
-      else
-        Array(args).to_set
-      end
-      unless( set - @estimator.variables ).empty?
-        raise ArgumentError, "Variables not part of estimator"
-      end
-      set
-    end
-
     def [](*args)
-      set = parse_args(args)
+      set = args.to_set
+      raise ArgumentError unless (set - @estimator.variables).empty?
+
       unless has_key? set
         self[set] = @estimator.distribution_class.new(@estimator, set)
       end

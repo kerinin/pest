@@ -11,7 +11,8 @@ class Pest::Estimator::Frequency
 
   class Distribution
     include Pest::Estimator::Distribution
-
+    
+    OFFSET = 0
     attr_reader :frequencies, :checksum
 
     def cache_model
@@ -28,9 +29,9 @@ class Pest::Estimator::Frequency
       cache_model
 
       array = NArray[ data.pick(*variable_array).map do |vector|
-        1 + @frequencies[Array(vector)].to_f
+        @frequencies[Array(vector)].to_f
       end ]
-      array.reshape!(data.length) / @estimator.data.length
+      (OFFSET + array.reshape!(data.length)) / (OFFSET + @estimator.data.length)
     end
 
     def entropy
