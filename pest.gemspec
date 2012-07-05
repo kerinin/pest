@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "pest"
-  s.version = "0.0.0"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Ryan Michael"]
-  s.date = "2012-06-24"
+  s.date = "2012-07-05"
   s.description = "Wrappers to facilitate different classes of probability estimators"
   s.email = "kerinin@gmail.com"
   s.extra_rdoc_files = [
@@ -30,7 +30,6 @@ Gem::Specification.new do |s|
     "lib/pest/function.rb",
     "lib/pest/function/entropy.rb",
     "lib/pest/function/probability.rb",
-    "lib/pest/variable.rb",
     "lib/pest/version.rb",
     "pest.gemspec",
     "spec/pest/data_set/hash_spec.rb",
@@ -45,14 +44,13 @@ Gem::Specification.new do |s|
     "spec/pest/estimator_spec.rb",
     "spec/pest/function/entropy_spec.rb",
     "spec/pest/function/probability_spec.rb",
-    "spec/pest/variable_spec.rb",
     "spec/pest_spec.rb",
     "spec/spec_helper.rb"
   ]
   s.homepage = "http://github.com/kerinin/pest"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.24"
+  s.rubygems_version = "1.8.23"
   s.summary = "Probability Estimation"
 
   if s.respond_to? :specification_version then
@@ -62,6 +60,10 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<pest>, [">= 0"])
       s.add_runtime_dependency(%q<narray>, [">= 0"])
       s.add_runtime_dependency(%q<uuidtools>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<rake>, [">= 0"])
+      s.add_development_dependency(%q<pry>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<rake>, [">= 0"])
       s.add_development_dependency(%q<pry>, [">= 0"])
@@ -90,11 +92,19 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rake>, [">= 0"])
       s.add_dependency(%q<pry>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<rake>, [">= 0"])
+      s.add_dependency(%q<pry>, [">= 0"])
+      s.add_dependency(%q<rspec>, [">= 0"])
     end
   else
     s.add_dependency(%q<pest>, [">= 0"])
     s.add_dependency(%q<narray>, [">= 0"])
     s.add_dependency(%q<uuidtools>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<rake>, [">= 0"])
+    s.add_dependency(%q<pry>, [">= 0"])
+    s.add_dependency(%q<rspec>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<rake>, [">= 0"])
     s.add_dependency(%q<pry>, [">= 0"])
