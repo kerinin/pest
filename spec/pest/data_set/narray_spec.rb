@@ -39,6 +39,10 @@ describe Pest::DataSet::NArray do
     it "sets variables" do
       @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).variables.should == [:foo, :bar].to_set
     end
+
+    it "sets variable_array" do
+      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).variable_array.should == [:foo, :bar]
+    end
   end
 
   describe "::from_csv" do
@@ -55,6 +59,11 @@ describe Pest::DataSet::NArray do
     it "creates variables from first line" do
       @instance = @class.from_csv @file.path
       @instance.variables.should == ["foo", "bar"].to_set
+    end
+
+    it "creates variable_array" do
+      @instance = @class.from_csv @file.path
+      @instance.variable_array.should == ["foo", "bar"]
     end
 
     it "creates data from the rest" do
@@ -85,6 +94,12 @@ describe Pest::DataSet::NArray do
     it "sets values" do
       @instance.to_hash.values.should == [[1,2,3],[4,5,6]]
     end
+
+    it "uses order defined in variable_array" do
+      @instance.to_hash.keys.should == [:foo, :bar]
+      @instance.variable_array.reverse!
+      @instance.to_hash.keys.should == [:bar, :foo]
+    end
   end
 
   describe "#pick" do
@@ -102,7 +117,15 @@ describe Pest::DataSet::NArray do
 
     it "accepts multiple variables" do
       @instance.pick(:bar, :foo).data.to_a.should == [[4,5,6],[1,2,3]]
-   end
+    end
+
+    it "sets variable_array" do
+      @instance.pick(:bar, :foo).variable_array.should == [:bar, :foo]
+    end
+
+    it "respects argument order" do
+      @instance.pick(:foo, :bar).variable_array.should == [:foo, :bar]
+    end
   end
 
   describe "#[]" do
@@ -114,20 +137,56 @@ describe Pest::DataSet::NArray do
     end
 
     context "with integer argument" do
+      before(:each) do
+        @result = @all[3]
+      end
+
       it "returns a copy with the vector at the passed index" do
-        @all[3].should == @index_subset
+        @result.should == @index_subset
+      end
+
+      it "sets variables" do
+        @result.variables.should == @all.variables
+      end
+
+      it "sets variable_array" do
+        @result.variable_array.should == @all.variable_array
       end
     end
 
     context "with a range argument" do
+      before(:each) do
+        @result = @all[0..1]
+      end
+
       it "returns a copy with the vectors specified by the range" do
-        @all[0..1].should == @range_subset
+        @result.should == @range_subset
+      end
+
+      it "sets variables" do
+        @result.variables.should == @all.variables
+      end
+
+      it "sets variable_array" do
+        @result.variable_array.should == @all.variable_array
       end
     end
 
     context "with multiple arguments" do
+      before(:each) do
+        @result = @all[3,0..1]
+      end
+
       it "returns a copy with the union of the passed arguments" do
-        @all[3,0..1].should == @union_subset
+        @result.should == @union_subset
+      end
+
+      it "sets variables" do
+        @result.variables.should == @all.variables
+      end
+
+      it "sets variable_array" do
+        @result.variable_array.should == @all.variable_array
       end
     end
   end
@@ -137,10 +196,30 @@ describe Pest::DataSet::NArray do
       @all = @class.from_hash :foo => [1,2,4], :bar => [5,6,8]
       @set_1 = @class.from_hash :foo => [1,2], :bar => [5,6]
       @set_2 = @class.from_hash :foo => [4], :bar => [8]
+      @result = @set_1 + @set_2
     end
 
     it "returns the union of self and other" do
-      (@set_1 + @set_2).should == @all
+      @result.should == @all
+    end
+
+    it "sets variables" do
+      @result.variables.should == @all.variables
+    end
+
+    it "sets variable_array" do
+      @result.variable_array.should == @all.variable_array
+    end
+  end
+
+  describe "#length" do
+    before(:each) do
+      @data = {:foo => [1,2,3], :bar => [3,4,5]}
+      @instance = Pest::DataSet::NArray.from_hash(@data)
+    end
+
+    it "delegates to hash" do
+      @instance.length.should == 3
     end
   end
 
@@ -190,6 +269,12 @@ describe Pest::DataSet::NArray do
       @instance.merge(@other).variables.should include(:baz)
     end
 
+    it "sets variable_array" do
+      @instance.merge(@other).variable_array.should == [:foo, :bar, :baz]
+      @instance.variable_array.reverse!
+      @instance.merge(@other).variable_array.should == [:bar, :foo, :baz]
+    end
+
     it "adds the passed data to self" do
       @instance.merge(@other).pick(:baz).to_a.should == [1,2,3,4]
     end
@@ -198,4 +283,6 @@ describe Pest::DataSet::NArray do
       @instance.merge(@other).pick(:foo).to_a.should == [10,11,12,13]
     end
   end
+
+  it "Needs to handle #+, #merge, etc with datasets using same variables in different orders"
 end

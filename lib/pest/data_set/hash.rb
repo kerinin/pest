@@ -22,6 +22,10 @@ class Pest::DataSet::Hash
     @hash = {}
   end
 
+  def variable_array
+    hash.keys
+  end
+
   def data
     hash.values
   end
@@ -43,7 +47,7 @@ class Pest::DataSet::Hash
       subset = self.class.new
       subset.variables = self.variables
       variables.each do |var|
-        subset.hash[var.name] = hash[var.name][arg]
+        subset.hash[var] = Array(hash[var][arg])
       end
       subset
     end.inject(:+)
@@ -58,7 +62,7 @@ class Pest::DataSet::Hash
     union = self.class.new
     union.variables = variables
     variables.each do |var|
-      union.hash[var.name] = hash[var.name] + other.hash[var.name]
+      union.hash[var] = Array(hash[var]) + Array(other.hash[var])
     end
     union
   end

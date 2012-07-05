@@ -47,8 +47,9 @@ class Pest::DataSet::NArray
 
   def to_hash
     hash = {}
-    variable_array.each_index do |i|
-      hash[variable_array[i]] = data[true,i].to_a[0]
+    variable_array.each do |variable|
+      i = variable_array.index(variable)
+      hash[variable] = data[true,i].to_a[0]
     end
     hash
   end
@@ -67,8 +68,9 @@ class Pest::DataSet::NArray
 
     args.map do |arg|
       subset = self.class.new
-      subset.variables = self.variables
-      subset.data = self.data[arg,true]
+      subset.variables = variables
+      subset.data = data[arg,true]
+      subset.instance_variable_set(:@variable_array, variable_array)
       subset
     end.inject(:+)
   end
@@ -84,6 +86,7 @@ class Pest::DataSet::NArray
     union = self.class.new
     union.variables = variables
     union.data = NMatrix[*(data.transpose.to_a + other.data.transpose.to_a)].transpose
+    union.instance_variable_set(:@variable_array, variable_array)
     union
   end
 
@@ -100,7 +103,9 @@ class Pest::DataSet::NArray
       self.variable_array.index(variable)
     end
 
-    self.class.new(args, self.data[true, picked_indices] )
+    subset = self.class.new(args, self.data[true, picked_indices] )
+    subset.instance_variable_set(:@variable_array, args)
+    subset
   end
 
   def each(&block)
