@@ -5,7 +5,6 @@ require 'uuidtools'
 require 'csv'
 
 require "pest/version"
-require "pest/variable"
 
 require "pest/function"
 require "pest/function/probability"

@@ -13,12 +13,11 @@ class Pest::DataSet::NArray
   end
 
   def self.from_hash(hash)
-    data_set = new
-    data_set.data = NMatrix.to_na(hash.values)
-    hash.keys.each do |key|
-      variable = key.kind_of?(Pest::Variable) ? key : Pest::Variable.new(:name => key)
-      data_set.variables[variable.name] = variable
-    end
+    data_set = new(
+      hash.keys.to_set, 
+      NMatrix.to_na(hash.values)
+    )
+    data_set.instance_variable_set(:@variable_array, hash.keys)
     data_set
   end
 
@@ -30,20 +29,26 @@ class Pest::DataSet::NArray
     args = {:col_sep => "\t", :headers => true, :converters => :all}.merge args
     csv_data = CSV.read(file, args).map(&:to_hash)
 
-    data_set = new
-    data_set.data = NMatrix.to_na(csv_data.map(&:values)).transpose
-    csv_data.first.keys.each do |key|
-      # variable = key.kind_of?(Pest::Variable) ? key : Pest::Variable.new(:name => key)
-      variable = Pest::Variable.deserialize(key) || Pest::Variable.new(:name => key)
-      data_set.variables[variable.name] = variable
-    end
+    data_set = new(
+      csv_data.first.keys.to_set,
+      NMatrix.to_na(csv_data.map(&:values)).transpose
+    )
+    # Ensure the ordering matches what's in the CSV
+    data_set.instance_variable_set(:@variable_array, csv_data.first.keys)
     data_set
+  end
+
+  attr_reader :variable_array
+
+  def initialize(*args)
+    super *args
+    @variable_array = variables.to_a.sort
   end
 
   def to_hash
     hash = {}
-    variables.values.each_index do |i|
-      hash[variables.values[i]] = data[true,i].to_a[0]
+    variable_array.each_index do |i|
+      hash[variable_array[i]] = data[true,i].to_a[0]
     end
     hash
   end
@@ -90,18 +95,12 @@ class Pest::DataSet::NArray
       raise ArgumentError, "You didn't specify any variables to pick"
     end
 
-    picked_variables = args.map do |arg|
-      to_variable(arg, true)
-    end
-    picked_indices = picked_variables.map do |variable|
-      self.variables.values.index(variable)
+    picked_indices = args.map do |variable|
+      raise ArgumentError, "Dataset doesn't include #{variable}" unless variables.include?(variable)
+      self.variable_array.index(variable)
     end
 
-    subset = self.class.new
-    subset.variables = {}
-    picked_variables.each {|v| subset.variables[v.name] = v}
-    subset.data = self.data[true, picked_indices]
-    subset
+    self.class.new(args, self.data[true, picked_indices] )
   end
 
   def each(&block)
@@ -111,9 +110,8 @@ class Pest::DataSet::NArray
   end
 
   def dup
-    instance = self.class.new
-    instance.variables = variables.dup
-    instance.data = data.dup
+    instance = self.class.new( variables.dup, data.dup)
+    instance.instance_variable_set(:@variable_array, variable_array)
     instance
   end
 
@@ -128,7 +126,8 @@ class Pest::DataSet::NArray
     # Merge the variables.  Existing variables should be updated,
     # new variables should be appended to the hash in the same order
     # as they appear in other
-    variables.merge! other.variables
+    @variable_array += (other.variables - variables).to_a
+    @variables += other.variables
 
     # Create the new data array, should be the size of the merged variables
     # by the number of vectors
@@ -140,7 +139,9 @@ class Pest::DataSet::NArray
 
     # Merge in other's data, using the indices of other's variables as the
     # slice keys
-    new_data[true, other.variables.values.map{|v| variables.values.index(v)}] = other.data
+    other.variables.each do |variable|
+      new_data[true, variable_array.index(variable)] = other.pick(variable).to_a.flatten
+    end
 
     self.data = new_data
     self

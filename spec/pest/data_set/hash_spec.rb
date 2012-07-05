@@ -6,9 +6,6 @@ require 'spec_helper'
 
 describe Pest::DataSet::Hash do
   before(:each) do
-    @v1 = Pest::Variable.new(:name => :foo)
-    @v2 = Pest::Variable.new(:name => :bar)
-    @v3 = Pest::Variable.new(:name => :baz)
     @class = Pest::DataSet::Hash
   end
 
@@ -23,19 +20,9 @@ describe Pest::DataSet::Hash do
   end
 
   describe "::from_hash" do
-    it "parses symbol keys into variables" do
+    it "gets variables from keys" do
       @instance = Pest::DataSet::Hash.from_hash(:foo => [1,2,3], :bar => [3,4,5])
-      @instance.variables.keys.should == [:foo, :bar]
-    end
-
-    it "retains variable names if passed" do
-      @instance = Pest::DataSet::Hash.from_hash(@v1 => [1,2,3], @v2 => [3,4,5])
-      @instance.variables.keys.should == [:foo, :bar]
-    end
-    
-    it "retains variables if passed" do
-      @instance = Pest::DataSet::Hash.from_hash(@v1 => [1,2,3], @v2 => [3,4,5])
-      @instance.variables.values.should == [@v1, @v2]
+      @instance.variables.should == [:foo, :bar].to_set
     end
   end
 
@@ -52,7 +39,7 @@ describe Pest::DataSet::Hash do
 
   describe "#pick" do
     before(:each) do
-      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
     end
 
     it "accepts a single symbol string" do
@@ -60,7 +47,7 @@ describe Pest::DataSet::Hash do
     end
 
     it "accepts a single variable" do
-      @instance.pick(@v1).data.to_a.first.should == [1,2,3]
+      @instance.pick(:foo).data.to_a.first.should == [1,2,3]
     end
 
     it "accepts multiple variables" do
@@ -81,7 +68,7 @@ describe Pest::DataSet::Hash do
 
   describe "#each" do
     before(:each) do
-      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
     end
 
     it "yields vectors" do
@@ -95,7 +82,7 @@ describe Pest::DataSet::Hash do
 
   describe "#map" do
     before(:each) do
-      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
     end
 
     it "works" do
@@ -105,8 +92,8 @@ describe Pest::DataSet::Hash do
 
   describe "#merge" do
     before(:each) do
-      @other    = @class.from_hash @v1 => [10,11,12,13], @v3 => [1,2,3,4]
-      @instance = @class.from_hash @v1 => [1,2,3,4], @v2 => [5,6,7,8]
+      @other    = @class.from_hash :foo => [10,11,12,13], :baz => [1,2,3,4]
+      @instance = @class.from_hash :foo => [1,2,3,4], :bar => [5,6,7,8]
     end
 
     it "accepts a dataset and returns dataset" do
@@ -114,26 +101,23 @@ describe Pest::DataSet::Hash do
     end
 
     it "accepts a hash and returns dataset" do
-      @instance.merge(@v1 => [10,11,12,13], @v3 => [1,2,3,4]).should be_a(@class)
+      @instance.merge(:foo => [10,11,12,13], :baz => [1,2,3,4]).should be_a(@class)
     end
 
     it "requires the dataset to have the same length" do
-      expect { @instance.merge(@v1 => [1,2,3,4,5]) }.to raise_error(ArgumentError)
+      expect { @instance.merge(:foo => [1,2,3,4,5]) }.to raise_error(ArgumentError)
     end
 
     it "adds the passed variable to self" do
-      @instance.merge(@other)
-      @instance.variables.values.should include(@v3)
+      @instance.merge(@other).variables.should include(:baz)
     end
 
     it "adds the passed data to self" do
-      @instance.merge(@other)
-      @instance.pick(@v3).to_a.flatten.should == [1,2,3,4]
+      @instance.merge(@other).pick(:baz).to_a.flatten.should == [1,2,3,4]
     end
 
     it "over-writes variables in self with variables in other" do
-      @instance.merge(@other)
-      @instance.pick(@v1).to_a.flatten.should == [10,11,12,13]
+      @instance.merge(@other).pick(:foo).to_a.flatten.should == [10,11,12,13]
     end
   end
 end

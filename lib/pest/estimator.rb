@@ -13,17 +13,6 @@ module Pest::Estimator
     @distributions ||= DistributionList.new(self)
   end
 
-  def to_variable(arg)
-    variable = case arg.class.name
-    when 'Pest::Variable'
-      arg
-    when 'String', 'Symbol'
-      variables[arg] || Pest::Variable.new(:name => arg)
-    end
-    raise ArgumentError unless variables.values.include?(variable)
-    variable
-  end
-
   module Distribution
     attr_reader :variables
 
@@ -52,17 +41,16 @@ module Pest::Estimator
 
     def parse_args(args)
       set = if args.kind_of? Array
-        if args.any? {|arg| arg.kind_of?(::Set)}
-          args.inject(::Set.new) {|set, el| set + el.to_set}
-        else
-          args.flatten.to_set
-        end
+        args.flatten.to_set
       elsif args.kind_of? ::Set
         args
       else
         Array(args).to_set
       end
-      set.map! {|arg| @estimator.to_variable(arg) }
+      unless( set - @estimator.variables ).empty?
+        raise ArgumentError, "Variables not part of estimator"
+      end
+      set
     end
 
     def [](*args)

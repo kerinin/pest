@@ -10,11 +10,8 @@ class Pest::DataSet::Hash
 
   def self.from_hash(hash)
     data_set = new
-    hash.each_pair do |key, value|
-      variable = key.kind_of?(Pest::Variable) ? key : Pest::Variable.new(:name => key)
-      data_set.variables[variable.name] = variable
-      data_set.hash[variable.name] = value
-    end
+    data_set.variables += hash.keys
+    data_set.instance_variable_set(:@hash, hash)
     data_set
   end
 
@@ -71,28 +68,23 @@ class Pest::DataSet::Hash
       raise ArgumentError, "You didn't specify any variables to pick"
     end
 
-    picked_variables = args.map do |arg|
-      to_variable(arg, true)
-    end
-
     subset = self.class.new
-    picked_variables.each do |var|
-      subset.variables[var.name] = var
-      subset.hash[var.name] = hash[var.name]
+    subset.variables += args
+    args.each do |var|
+      raise ArgumentError, "Dataset doesn't include '#{var}'" unless hash.has_key?(var)
+      subset.hash[var] = hash[var]
     end
     subset
   end
 
   def each(&block)
-    (0..length-1).to_a.each do |i|
-      yield variables.keys.map {|key| hash[key][i]}
-    end
+    (0..length-1).to_a.each do |i| yield variables.map {|var| hash[var][i]} end
   end
 
   def dup
     instance = self.class.new
     instance.variables = variables.dup
-    instance.hash = hash.dup
+    instance.instance_variable_set(:@hash, hash.dup)
     instance
   end
 
@@ -104,7 +96,7 @@ class Pest::DataSet::Hash
     other = self.class.from_hash(other) if other.kind_of?(::Hash)
     raise ArgumentError, "Lengths must be the same" if other.length != length
 
-    variables.merge! other.variables
+    @variables += other.variables
     hash.merge! other.hash
 
     self

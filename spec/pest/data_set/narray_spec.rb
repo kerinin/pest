@@ -3,9 +3,6 @@ require 'narray'
 
 describe Pest::DataSet::NArray do
   before(:each) do
-    @v1 = Pest::Variable.new(:name => :foo)
-    @v2 = Pest::Variable.new(:name => :bar)
-    @v3 = Pest::Variable.new(:name => :baz)
     @class = Pest::DataSet::NArray
   end
 
@@ -36,15 +33,11 @@ describe Pest::DataSet::NArray do
     end
 
     it "creates a NArray" do
-      @class.from_hash({@v1 => [1,2,3], @v2 => [4,5,6]}).data.should == @matrix
+      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).data.should == @matrix
     end
 
     it "sets variables" do
-      @class.from_hash({@v1 => [1,2,3], @v2 => [4,5,6]}).variables.values.should == [@v1, @v2]
-    end
-
-    it "generates Pest::Variables if not passed" do
-      @class.from_hash({:foo => [1,2,3]}).variables[:foo].should be_a(Pest::Variable)
+      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).variables.should == [:foo, :bar].to_set
     end
   end
 
@@ -61,44 +54,32 @@ describe Pest::DataSet::NArray do
 
     it "creates variables from first line" do
       @instance = @class.from_csv @file.path
-      @instance.variables.values.map(&:name).should == ["foo", "bar"]
+      @instance.variables.should == ["foo", "bar"].to_set
     end
 
     it "creates data from the rest" do
       @instance = @class.from_csv @file.path
-      @instance.to_hash.should == {@instance.variables["foo"] => [1,1,1], @instance.variables["bar"] => [1,2,3]}
+      @instance.to_hash.should == {"foo" => [1,1,1], "bar" => [1,2,3]}
     end
 
     it "accepts a filename" do
       @instance = @class.from_csv @file.path
-      @instance.to_hash.should == {@instance.variables["foo"] => [1,1,1], @instance.variables["bar"] => [1,2,3]}
+      @instance.to_hash.should == {"foo" => [1,1,1], "bar" => [1,2,3]}
     end
 
     it "accepts an IO" do
       @instance = @class.from_csv @file
-      @instance.to_hash.should == {@instance.variables["foo"] => [1,1,1], @instance.variables["bar"] => [1,2,3]}
-    end
-
-    it "deserializes variables if found" do
-      @file = Tempfile.new('test_csv')
-      CSV.open(@file.path, 'w', :col_sep => "\t") do |csv|
-        csv << [@v1,@v2].map(&:serialize)
-        csv << [1,1]
-        csv << [1,2]
-        csv << [1,3]
-      end
-
-      @class.from_csv(@file).variables.should == {'foo' => @v1, 'bar' => @v2}
+      @instance.to_hash.should == {"foo" => [1,1,1], "bar" => [1,2,3]}
     end
   end
 
   describe "#to_hash" do
     before(:each) do
-      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
     end
 
     it "sets keys" do
-      @instance.to_hash.keys.should == @instance.variables.values
+      @instance.to_hash.keys.to_set.should == @instance.variables
     end
 
     it "sets values" do
@@ -108,7 +89,7 @@ describe Pest::DataSet::NArray do
 
   describe "#pick" do
     before(:each) do
-      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
     end
 
     it "accepts a single symbol string" do
@@ -116,7 +97,7 @@ describe Pest::DataSet::NArray do
     end
 
     it "accepts a single variable" do
-      @instance.pick(@v1).data.to_a.first.should == [1,2,3]
+      @instance.pick(:foo).data.to_a.first.should == [1,2,3]
     end
 
     it "accepts multiple variables" do
@@ -126,10 +107,10 @@ describe Pest::DataSet::NArray do
 
   describe "#[]" do
     before(:each) do
-      @all = @class.from_hash @v1 => [1,2,3,4], @v2 => [5,6,7,8]
-      @range_subset = @class.from_hash @v1 => [1,2], @v2 => [5,6]
-      @index_subset = @class.from_hash @v1 => [4], @v2 => [8]
-      @union_subset = @class.from_hash @v1 => [4,1,2], @v2 => [8,5,6]
+      @all = @class.from_hash :foo => [1,2,3,4], :bar => [5,6,7,8]
+      @range_subset = @class.from_hash :foo => [1,2], :bar => [5,6]
+      @index_subset = @class.from_hash :foo => [4], :bar => [8]
+      @union_subset = @class.from_hash :foo => [4,1,2], :bar => [8,5,6]
     end
 
     context "with integer argument" do
@@ -153,9 +134,9 @@ describe Pest::DataSet::NArray do
 
   describe "#+" do
     before(:each) do
-      @all = @class.from_hash @v1 => [1,2,4], @v2 => [5,6,8]
-      @set_1 = @class.from_hash @v1 => [1,2], @v2 => [5,6]
-      @set_2 = @class.from_hash @v1 => [4], @v2 => [8]
+      @all = @class.from_hash :foo => [1,2,4], :bar => [5,6,8]
+      @set_1 = @class.from_hash :foo => [1,2], :bar => [5,6]
+      @set_2 = @class.from_hash :foo => [4], :bar => [8]
     end
 
     it "returns the union of self and other" do
@@ -165,7 +146,7 @@ describe Pest::DataSet::NArray do
 
   describe "#each" do
     before(:each) do
-      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
     end
 
     it "yields vectors" do
@@ -179,7 +160,7 @@ describe Pest::DataSet::NArray do
 
   describe "#map" do
     before(:each) do
-      @instance = @class.from_hash @v1 => [1,2,3], @v2 => [4,5,6]
+      @instance = @class.from_hash :foo => [1,2,3], :bar => [4,5,6]
     end
 
     it "works" do
@@ -189,8 +170,8 @@ describe Pest::DataSet::NArray do
 
   describe "#merge" do
     before(:each) do
-      @other    = @class.from_hash @v1 => [10,11,12,13], @v3 => [1,2,3,4]
-      @instance = @class.from_hash @v1 => [1,2,3,4], @v2 => [5,6,7,8]
+      @other    = @class.from_hash :foo => [10,11,12,13], :baz => [1,2,3,4]
+      @instance = @class.from_hash :foo => [1,2,3,4], :bar => [5,6,7,8]
     end
 
     it "accepts a dataset and returns dataset" do
@@ -198,26 +179,23 @@ describe Pest::DataSet::NArray do
     end
 
     it "accepts a hash and returns dataset" do
-      @instance.merge(@v1 => [10,11,12,13], @v3 => [1,2,3,4]).should be_a(@class)
+      @instance.merge(:foo => [10,11,12,13], :baz => [1,2,3,4]).should be_a(@class)
     end
 
     it "requires the dataset to have the same length" do
-      expect { @instance.merge(@v1 => [1,2,3,4,5]) }.to raise_error(ArgumentError)
+      expect { @instance.merge(:foo => [1,2,3,4,5]) }.to raise_error(ArgumentError)
     end
 
     it "adds the passed variable to self" do
-      @instance.merge(@other)
-      @instance.variables.values.should include(@v3)
+      @instance.merge(@other).variables.should include(:baz)
     end
 
     it "adds the passed data to self" do
-      @instance.merge(@other)
-      @instance.pick(@v3).to_a.should == [1,2,3,4]
+      @instance.merge(@other).pick(:baz).to_a.should == [1,2,3,4]
     end
 
     it "over-writes variables in self with variables in other" do
-      @instance.merge(@other)
-      @instance.pick(@v1).to_a.should == [10,11,12,13]
+      @instance.merge(@other).pick(:foo).to_a.should == [10,11,12,13]
     end
   end
 end
