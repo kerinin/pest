@@ -54,15 +54,15 @@ describe Pest::DataSet::Hash do
     end
 
     it "accepts a single symbol string" do
-      @instance.pick(:foo).data.to_a.first.should == [1,2,3]
+      @instance.pick(:foo).to_a.first.should == [1,2,3]
     end
 
     it "accepts a single variable" do
-      @instance.pick(:foo).data.to_a.first.should == [1,2,3]
+      @instance.pick(:foo).to_a.first.should == [1,2,3]
     end
 
     it "accepts multiple variables" do
-      @instance.pick(:bar, :foo).data.to_a.should == [[4,5,6],[1,2,3]]
+      @instance.pick(:bar, :foo).to_a.should == [[4,5,6],[1,2,3]]
    end
 
     it "sets variable_array" do

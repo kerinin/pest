@@ -9,29 +9,29 @@ class Pest::DataSet::Hash
   end
 
   def self.from_hash(hash)
-    data_set = new
-    data_set.variables += hash.keys
-    data_set.instance_variable_set(:@hash, hash)
-    data_set
+    new hash
   end
 
-  attr_reader :variables, :hash
+  attr_reader :hash
 
-  def initialize(*args)
-    super *args
-    @hash = {}
+  def initialize(hash={})
+    @hash = hash
+  end
+
+  def variables
+    hash.keys.to_set
   end
 
   def variable_array
     hash.keys
   end
 
-  def data
-    hash.values
-  end
-
   def to_hash
     hash
+  end
+
+  def to_a
+    hash.values
   end
 
   def length
@@ -51,20 +51,19 @@ class Pest::DataSet::Hash
       end
       subset
     end.inject(:+)
- 
   end
+
+  def ==(other)
+    other.kind_of?( Hash ) and hash == other.hash
+  end
+  alias :eql? :==
 
   def +(other)
     unless other.variables == variables
       raise ArgumentError, "DataSets have different variables"
     end
 
-    union = self.class.new
-    union.variables = variables
-    variables.each do |var|
-      union.hash[var] = Array(hash[var]) + Array(other.hash[var])
-    end
-    union
+    self.class.new hash.merge(other.hash) {|k,o,n| Array(o) + Array(n)}
   end
 
   def pick(*args)

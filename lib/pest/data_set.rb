@@ -29,10 +29,10 @@ module Pest::DataSet
     raise NotImplementedError
   end
 
-  def ==(other)
-    variables == other.variables and data == other.data
-  end
-  alias :eql? :==
+  # def ==(other)
+  #   variables == other.variables and data == other.data
+  # end
+  # alias :eql? :==
 
   def [](*args)
     raise NotImplementedError

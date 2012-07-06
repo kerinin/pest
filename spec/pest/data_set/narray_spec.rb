@@ -28,20 +28,12 @@ describe Pest::DataSet::NArray do
   end
 
   describe "::from_hash" do
-    before(:each) do
-      @matrix = NArray.to_na [[1,2,3],[4,5,6]]
-    end
-
     it "creates a NArray" do
-      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).data.should == @matrix
+      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).to_a.should == [[1,2,3],[4,5,6]]
     end
 
     it "sets variables" do
       @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).variables.should == [:foo, :bar].to_set
-    end
-
-    it "sets variable_array" do
-      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).variable_array.should == [:foo, :bar]
     end
   end
 
@@ -59,11 +51,6 @@ describe Pest::DataSet::NArray do
     it "creates variables from first line" do
       @instance = @class.from_csv @file.path
       @instance.variables.should == ["foo", "bar"].to_set
-    end
-
-    it "creates variable_array" do
-      @instance = @class.from_csv @file.path
-      @instance.variable_array.should == ["foo", "bar"]
     end
 
     it "creates data from the rest" do
@@ -94,12 +81,6 @@ describe Pest::DataSet::NArray do
     it "sets values" do
       @instance.to_hash.values.should == [[1,2,3],[4,5,6]]
     end
-
-    it "uses order defined in variable_array" do
-      @instance.to_hash.keys.should == [:foo, :bar]
-      @instance.variable_array.reverse!
-      @instance.to_hash.keys.should == [:bar, :foo]
-    end
   end
 
   describe "#pick" do
@@ -108,23 +89,15 @@ describe Pest::DataSet::NArray do
     end
 
     it "accepts a single symbol string" do
-      @instance.pick(:foo).data.to_a.first.should == [1,2,3]
+      @instance.pick(:foo).to_a.first.should == [1,2,3]
     end
 
     it "accepts a single variable" do
-      @instance.pick(:foo).data.to_a.first.should == [1,2,3]
+      @instance.pick(:foo).to_a.first.should == [1,2,3]
     end
 
     it "accepts multiple variables" do
-      @instance.pick(:bar, :foo).data.to_a.should == [[4,5,6],[1,2,3]]
-    end
-
-    it "sets variable_array" do
-      @instance.pick(:bar, :foo).variable_array.should == [:bar, :foo]
-    end
-
-    it "respects argument order" do
-      @instance.pick(:foo, :bar).variable_array.should == [:foo, :bar]
+      @instance.pick(:bar, :foo).to_a.should == [[4,5,6],[1,2,3]]
     end
   end
 
@@ -148,10 +121,6 @@ describe Pest::DataSet::NArray do
       it "sets variables" do
         @result.variables.should == @all.variables
       end
-
-      it "sets variable_array" do
-        @result.variable_array.should == @all.variable_array
-      end
     end
 
     context "with a range argument" do
@@ -166,10 +135,6 @@ describe Pest::DataSet::NArray do
       it "sets variables" do
         @result.variables.should == @all.variables
       end
-
-      it "sets variable_array" do
-        @result.variable_array.should == @all.variable_array
-      end
     end
 
     context "with multiple arguments" do
@@ -183,10 +148,6 @@ describe Pest::DataSet::NArray do
 
       it "sets variables" do
         @result.variables.should == @all.variables
-      end
-
-      it "sets variable_array" do
-        @result.variable_array.should == @all.variable_array
       end
     end
   end
@@ -205,10 +166,6 @@ describe Pest::DataSet::NArray do
 
     it "sets variables" do
       @result.variables.should == @all.variables
-    end
-
-    it "sets variable_array" do
-      @result.variable_array.should == @all.variable_array
     end
   end
 
@@ -267,12 +224,6 @@ describe Pest::DataSet::NArray do
 
     it "adds the passed variable to self" do
       @instance.merge(@other).variables.should include(:baz)
-    end
-
-    it "sets variable_array" do
-      @instance.merge(@other).variable_array.should == [:foo, :bar, :baz]
-      @instance.variable_array.reverse!
-      @instance.merge(@other).variable_array.should == [:bar, :foo, :baz]
     end
 
     it "adds the passed data to self" do
