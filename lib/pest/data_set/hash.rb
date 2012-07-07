@@ -69,7 +69,7 @@ class Pest::DataSet::Hash
 
     self.class.new(
       ::Hash[ args.map do |key|
-        raise ArgumentError, "Dataset doesn't include '#{key}'" unless hash.has_key?(key)
+        # raise ArgumentError, "Dataset doesn't include '#{key}'" unless hash.has_key?(key)
         [key, hash[key]]
       end ]
     )

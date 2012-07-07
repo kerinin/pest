@@ -14,12 +14,12 @@ module Pest::Function
         @estimator      = estimator
         @event          = variables.to_set
         @givens         = Set.new
-        raise ArgumentError unless (@event - @estimator.variables).empty?
+        # raise ArgumentError unless (@event - @estimator.variables).empty?
       end
 
       def given(*variables)
         @givens.merge variables.to_set
-        raise ArgumentError unless (@givens - @estimator.variables).empty?
+        # raise ArgumentError unless (@givens - @estimator.variables).empty?
         self
       end
 

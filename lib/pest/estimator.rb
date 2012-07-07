@@ -41,7 +41,7 @@ module Pest::Estimator
 
     def [](*args)
       set = args.to_set
-      raise ArgumentError unless (set - @estimator.variables).empty?
+      # raise ArgumentError unless (set - @estimator.variables).empty?
 
       unless has_key? set
         self[set] = @estimator.distribution_class.new(@estimator, set)
