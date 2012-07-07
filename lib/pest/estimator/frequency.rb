@@ -5,6 +5,13 @@ class Pest::Estimator::Frequency
   include Pest::Function::Probability
   include Pest::Function::Entropy
 
+  attr_reader :offset
+
+  def initialize(data, offset=1)
+    @offset = offset
+    super(data)
+  end
+
   def distribution_class
     Distribution
   end
@@ -12,7 +19,6 @@ class Pest::Estimator::Frequency
   class Distribution
     include Pest::Estimator::Distribution
     
-    OFFSET = 0
     attr_reader :frequencies, :checksum
 
     def cache_model
@@ -31,7 +37,7 @@ class Pest::Estimator::Frequency
       array = NArray[ data.pick(*variable_array).map do |vector|
         @frequencies[Array(vector)].to_f
       end ]
-      (OFFSET + array.reshape!(data.length)) / (OFFSET + @estimator.data.length)
+      (@estimator.offset + array.reshape!(data.length)) / (@estimator.offset + @estimator.data.length)
     end
 
     def entropy

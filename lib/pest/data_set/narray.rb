@@ -68,8 +68,7 @@ class Pest::DataSet::NArray
   end
 
   def to_a
-    slice = variable_hash.length > 1 ? variable_hash.values : variable_hash.values.first
-    data[true, slice].to_a
+    data.to_a
   end
 
   # Return a subset of the data with the same variables,
@@ -81,6 +80,7 @@ class Pest::DataSet::NArray
     end
 
     args.map do |arg|
+      arg = Array(arg) unless arg.kind_of?(Enumerable) or arg.kind_of?(Range)
       self.class.new(
         variable_hash,
         data[arg,true]
@@ -110,12 +110,12 @@ class Pest::DataSet::NArray
       raise ArgumentError, "You didn't specify any variables to pick"
     end
 
+    picked_indices = args.map {|v| variable_hash[v]}
 
-    args.each do |variable|
-      raise ArgumentError, "Dataset doesn't include #{variable}" unless variable_hash.has_key?(variable)
-    end
-
-    self.class.new ::Hash[ args.map {|var| [var, variable_hash[var]]} ], data
+    self.class.new(
+      ::Hash[ args.each_with_index.map {|v,i| [v,i]} ],
+      data[true, picked_indices]
+    )
   end
 
   def each(&block)
@@ -125,7 +125,7 @@ class Pest::DataSet::NArray
   end
 
   def dup
-    self.class.new( variable_hash.dup, data )
+    self.class.new( variable_hash.dup, data.dup )
   end
 
   def merge(other)
@@ -134,50 +134,29 @@ class Pest::DataSet::NArray
 
   def merge!(other)
     other = self.class.from_hash(other) if other.kind_of?(::Hash)
-
+    other = self.class.from_hash(other.to_hash) unless other.kind_of?(NArray)
     raise ArgumentError, "Lengths must be the same" if other.length != length
 
-    if data == other.data
-      variable_hash.merge! other.variable_hash
-    else
-      # Remove data that's not needed
-      prune
-      other.prune
-
-      # Extend the variable hash with any new variables
-      (other.variables - variables).each do |var|
-        variable_hash[var] = variable_hash.length
-      end
-
-      # Create the new data array, should be the size of the merged variables
-      # by the number of vectors
-      new_data = ::NArray.object(length, variable_hash.length)
-
-      # Copy over the data from self (as if we had extended self.data to the
-      # right to allow for the new data)
-      new_data[true, 0..data.shape[1]-1] = data
-
-      # Merge in other's data, using the indices of other's variables as the
-      # slice keys
-      source_indices = other.variable_hash.values
-      target_indices = other.variable_hash.keys.map {|key| variable_hash[key]}
-      new_data[true, target_indices] = other.data[true, source_indices]
-
-      self.data = new_data
+    # Extend the variable hash with any new variables
+    (other.variables - variables).each do |var|
+      variable_hash[var] = variable_hash.length
     end
 
+    # Create the new data array, should be the size of the merged variables
+    # by the number of vectors
+    new_data = ::NArray.object(length, variable_hash.length)
+
+    # Copy over the data from self (as if we had extended self.data to the
+    # right to allow for the new data)
+    new_data[true, 0..data.shape[1]-1] = data
+
+    # Merge in other's data, using the indices of other's variables as the
+    # slice keys
+    source_indices = other.variable_hash.values
+    target_indices = other.variable_hash.keys.map {|key| variable_hash[key]}
+    new_data[true, target_indices] = other.data[true, source_indices]
+
+    self.data = new_data
     self
-  end
-
-  # Private Methods
-  
-  # Remove data not referenced by a variable and recalculate
-  # the variable array
-  #
-  def prune
-    self.data = data[true, variable_hash.values]
-    variable_hash.keys.each_with_index do |key, i|
-      variable_hash[key] = i
-    end
   end
 end

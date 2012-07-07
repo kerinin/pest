@@ -5,7 +5,7 @@ describe Pest::Estimator::Frequency do
     @class = Pest::Estimator::Frequency
     @data = Pest::DataSet::NArray.from_hash :foo => [1,1,2,3], :bar => [1,1,1,1]
     @test = Pest::DataSet::NArray.from_hash :foo => [1,2,4], :bar => [1,1,1]
-    @instance = @class.new(@data)
+    @instance = @class.new(@data, 0)
   end
 
   it "inherits from set" do

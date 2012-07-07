@@ -24,10 +24,6 @@ describe Pest::DataSet::Hash do
       @instance = Pest::DataSet::Hash.from_hash(:foo => [1,2,3], :bar => [3,4,5])
       @instance.variables.should == [:foo, :bar].to_set
     end
-
-    it "sets variable_array" do
-      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).variable_array.should == [:foo, :bar]
-    end
   end
 
   before(:each) do
@@ -38,13 +34,6 @@ describe Pest::DataSet::Hash do
   describe "#to_hash" do
     it "returns a hash" do
       @instance.to_hash.should == @data
-    end
-
-    it "uses order defined in variable_array" do
-      pending "Is it worth supporting modifications to variable_array?"
-      @instance.to_hash.keys.should == @instance.variable_array
-      @instance.variable_array.reverse!
-      @instance.to_hash.keys.should == @instance.variable_array.reverse
     end
   end
 
@@ -64,14 +53,6 @@ describe Pest::DataSet::Hash do
     it "accepts multiple variables" do
       @instance.pick(:bar, :foo).to_a.should == [[4,5,6],[1,2,3]]
    end
-
-    it "sets variable_array" do
-      @instance.pick(:bar, :foo).variable_array.should == [:bar, :foo]
-    end
-
-    it "respects argument order" do
-      @instance.pick(:foo, :bar).variable_array.should == [:foo, :bar]
-    end
   end
 
   describe "#[]" do
@@ -94,10 +75,6 @@ describe Pest::DataSet::Hash do
       it "sets variables" do
         @result.variables.should == @all.variables
       end
-
-      it "sets variable_array" do
-        @result.variable_array.should == @all.variable_array
-      end
     end
 
     context "with a range argument" do
@@ -112,10 +89,6 @@ describe Pest::DataSet::Hash do
       it "sets variables" do
         @result.variables.should == @all.variables
       end
-
-      it "sets variable_array" do
-        @result.variable_array.should == @all.variable_array
-      end
     end
 
     context "with multiple arguments" do
@@ -129,10 +102,6 @@ describe Pest::DataSet::Hash do
 
       it "sets variables" do
         @result.variables.should == @all.variables
-      end
-
-      it "sets variable_array" do
-        @result.variable_array.should == @all.variable_array
       end
     end
   end
@@ -151,10 +120,6 @@ describe Pest::DataSet::Hash do
 
     it "sets variables" do
       @result.variables.should == @all.variables
-    end
-
-    it "sets variable_array" do
-      @result.variable_array.should == @all.variable_array
     end
   end
 
@@ -214,13 +179,6 @@ describe Pest::DataSet::Hash do
 
     it "adds the passed variable to self" do
       @instance.merge(@other).variables.should include(:baz)
-    end
-
-    it "sets variable_array" do
-      pending "Is it worth supporting modifications to variable_array?"
-      @instance.merge(@other).variable_array.should == [:foo, :bar, :baz]
-      @instance.variable_array.reverse!
-      @instance.merge(@other).variable_array.should == [:bar, :foo, :baz]
     end
 
     it "adds the passed data to self" do

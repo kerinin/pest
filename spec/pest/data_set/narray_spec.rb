@@ -227,13 +227,14 @@ describe Pest::DataSet::NArray do
     end
 
     it "adds the passed data to self" do
-      @instance.merge(@other).pick(:baz).to_a.should == [1,2,3,4]
+      @instance.merge(@other).pick(:baz).to_a.flatten.should == [1,2,3,4]
     end
 
     it "over-writes variables in self with variables in other" do
-      @instance.merge(@other).pick(:foo).to_a.should == [10,11,12,13]
+      @instance.merge(@other).pick(:foo).to_a.flatten.should == [10,11,12,13]
     end
   end
 
   it "Needs to handle #+, #merge, etc with datasets using same variables in different orders"
+  it "needs to handle all that shit with datasets of different type (Hash.merge Narray)"
 end

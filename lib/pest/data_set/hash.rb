@@ -22,10 +22,6 @@ class Pest::DataSet::Hash
     hash.keys.to_set
   end
 
-  def variable_array
-    hash.keys
-  end
-
   def to_hash
     hash
   end
@@ -71,13 +67,12 @@ class Pest::DataSet::Hash
       raise ArgumentError, "You didn't specify any variables to pick"
     end
 
-    subset = self.class.new
-    subset.variables += args
-    args.each do |var|
-      raise ArgumentError, "Dataset doesn't include '#{var}'" unless hash.has_key?(var)
-      subset.hash[var] = hash[var]
-    end
-    subset
+    self.class.new(
+      ::Hash[ args.map do |key|
+        raise ArgumentError, "Dataset doesn't include '#{key}'" unless hash.has_key?(key)
+        [key, hash[key]]
+      end ]
+    )
   end
 
   def each(&block)
@@ -97,6 +92,7 @@ class Pest::DataSet::Hash
 
   def merge!(other)
     other = self.class.from_hash(other) if other.kind_of?(::Hash)
+    other = self.class.from_hash(other.to_hash) unless other.kind_of?(Hash)
     raise ArgumentError, "Lengths must be the same" if other.length != length
 
     @variables += other.variables
