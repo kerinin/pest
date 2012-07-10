@@ -5,6 +5,11 @@ module Pest::Function
     end
     alias :h :entropy
 
+    def mutual_information(first, second)
+      h(first) + h(second) - h(first, second)
+    end
+    alias :i :mutual_information
+
     class Builder
       include Pest::Function::Builder
 
@@ -18,17 +23,18 @@ module Pest::Function
       end
 
       def given(*variables)
-        @givens.merge variables.to_set
+        @givens += variables.to_set
         # raise ArgumentError unless (@givens - @estimator.variables).empty?
         self
       end
 
       def evaluate
-        joint = estimator.distributions[event].entropy
         if givens.empty?
-          joint
+          estimator.distributions[*event].entropy
         else
-          conditional = estimator.distributions[givens].entropy
+          joint = estimator.distributions[*(event + givens)].entropy
+          conditional = estimator.distributions[*givens].entropy
+
           joint - conditional
         end
       end

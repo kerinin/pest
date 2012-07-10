@@ -89,4 +89,11 @@ e.batch_p(:foo, :bar).given(:baz, :qux).in(test)      # Moar
 
 ## TODO
 
+* Graph helpers
+* refactor builders into simple functions
+* 'add_data' and possibly 'remove_data' for estimators
+* model caching, lazy loading of files
+* new estimator functions
+* ? does it make sense to make datasets based on their sources?  So Hash, CSV, etc? I feel like I'm mixing concerns a bit...
+
 the builders should validate the variables they're given and throw errors if they're not part of the estimators data

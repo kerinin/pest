@@ -23,7 +23,7 @@ module Pest::Function
       end
 
       def given(*variables)
-        @givens += variables
+        @givens += variables.to_set
         # raise ArgumentError unless (@givens - @estimator.variables).empty?
         self
       end

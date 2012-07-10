@@ -45,6 +45,7 @@ describe Pest::Function::Probability do
       end
 
       it "fails if variable undefined for estimator" do
+        pending "slow - necessary?"
         lambda { ProbabilityTestClass::BatchBuilder.new(@instance, [:foo, :baz]) }.should raise_error(ArgumentError)
       end
 
@@ -64,6 +65,7 @@ describe Pest::Function::Probability do
       end
 
       it "fails if variables aren't variables on the estimator" do
+        pending "slow - necessary?"
         lambda { @builder.given(:baz) }.should raise_error(ArgumentError)
       end
 
@@ -156,6 +158,7 @@ describe Pest::Function::Probability do
       end
 
       it "fails if variables aren't variables on the estimator" do
+        pending "slow - necessary?"
         lambda { @builder.given(:baz => 3) }.should raise_error(ArgumentError)
       end
 

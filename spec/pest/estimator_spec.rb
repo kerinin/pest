@@ -49,6 +49,7 @@ describe Pest::Estimator do
     end
 
     it "fails if a set variable isn't defined" do
+      pending "slow - necessary?"
       lambda { @instance.distributions[:foo, :baz] }.should raise_error(ArgumentError)
     end
   end
