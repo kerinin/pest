@@ -89,8 +89,10 @@ module Pest::DataSet
       end
     end
 
-    def translators(*args)
-      raise NotImplementedError
+    def translators
+      {
+        Hash => :from_hash
+      }
     end
 
     def from_file(*args)

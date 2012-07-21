@@ -26,16 +26,6 @@ describe Pest::DataSet::NArray do
     end
   end
 
-  describe "::from_hash" do
-    it "creates a NArray" do
-      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).to_a.should == [[1,2,3],[4,5,6]]
-    end
-
-    it "sets variables" do
-      @class.from_hash({:foo => [1,2,3], :bar => [4,5,6]}).variables.should == [:foo, :bar].to_set
-    end
-  end
-
   describe "::from_csv" do
     before(:each) do
       @file = Tempfile.new('test_csv')

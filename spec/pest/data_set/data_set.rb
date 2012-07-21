@@ -10,6 +10,18 @@ shared_examples_for "a data set" do |described_class|
     end
   end
 
+  describe "::from_hash" do
+    before(:each) { @instance = described_class.from_hash :foo => [1,2,3], :bar => [4,5,6] }
+
+    it "sets variables" do
+      @instance.variables.should == [:foo, :bar].to_set
+    end
+
+    it "handles data" do
+      @instance.to_a.should == [[1,2,3],[4,5,6]]
+    end
+  end
+
   # All data sets should implement to_hash, same reason as above
   #
   describe "#to_hash" do
