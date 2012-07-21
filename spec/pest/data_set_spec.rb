@@ -1,15 +1,16 @@
 require 'spec_helper'
 
-class TestClass
+class DataSetTestClass
   include Pest::DataSet
 end
 
 describe Pest::DataSet do
-  before(:each) { @instance = TestClass.new }
+  before(:each) do
+    @class = DataSetTestClass
+    @instance = DataSetTestClass.new
+  end
 
   describe Pest::DataSet::ClassMethods do
-    before(:each) { @class = TestClass }
-
     describe "::from" do
       before(:each) do
         @class.stub(:translators).and_return(Hash => :from_hash)
@@ -65,8 +66,8 @@ describe Pest::DataSet do
   end
 
   describe "#variables" do
-    it "defaults to an empty list" do
-      @instance.variables.should == {}
+    it "defaults to an empty set" do
+      @instance.variables.should == Set.new
     end
   end
 
@@ -112,7 +113,6 @@ describe Pest::DataSet do
   end
 
   it "inherits from Enumerable" do
-    @instance = TestClass.new
     @instance.should be_a(Enumerable)
   end
 
@@ -122,7 +122,7 @@ describe Pest::DataSet do
     end
   end
 
-  describe "#merge" do
+  describe "#merge!" do
     it "returns NotImplementedError" do
       expect { @instance.merge(@instance) }.to raise_error(NotImplementedError)
     end

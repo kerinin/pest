@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-class TestClass
+class EstimatorTestClass
   include Pest::Estimator
   def distribution_class; Distribution end
   class Distribution
@@ -11,7 +11,7 @@ end
 describe Pest::Estimator do
   before(:each) do
     @data = Pest::DataSet::NArray.from_hash :foo => [1,1,2,3], :bar => [1,1,1,1]
-    @class = TestClass
+    @class = EstimatorTestClass
   end
 
   describe "::new" do
@@ -28,7 +28,7 @@ describe Pest::Estimator do
 
   describe "#estimates" do
     before(:each) do
-      @instance = TestClass.new
+      @instance = EstimatorTestClass.new
       @instance.stub(:variables).and_return([:foo, :bar].to_set)
     end
 
@@ -56,8 +56,8 @@ describe Pest::Estimator do
 
   describe Pest::Estimator::Distribution do
     before(:each) do
-      @class = TestClass::Distribution
-      @estimator = TestClass.new
+      @class = EstimatorTestClass::Distribution
+      @estimator = EstimatorTestClass.new
       @estimator.stub(:variables).and_return({:foo => :foo, :bar => :bar})
       @instance = @class.new(@estimator, @estimator.variables) 
     end

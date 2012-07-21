@@ -33,7 +33,7 @@ class Pest::DataSet::NArray
     )
   end
 
-  attr_accessor :variable_hash
+  attr_accessor :variable_hash, :data
 
   def initialize(variable_hash={}, data=NArray[])
     @variable_hash = variable_hash
@@ -51,13 +51,6 @@ class Pest::DataSet::NArray
 
     hash
   end
-
-  def ==(other)
-    # NOTE: This will return false if the data isn't the same, but we may want this to
-    # return true if the data is the same for the variables we care about
-    other.kind_of?(NArray) and variable_hash == other.variable_hash and data == other.data
-  end
-  alias :eql? :==
 
   def variables
     variable_hash.keys.to_set
@@ -126,10 +119,6 @@ class Pest::DataSet::NArray
 
   def dup
     self.class.new( variable_hash.dup, data.dup )
-  end
-
-  def merge(other)
-    dup.merge!(other)
   end
 
   def merge!(other)

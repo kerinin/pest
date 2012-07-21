@@ -4,7 +4,8 @@ class Pest::DataSet::Hash
   def self.translators
     {
       String  => :from_file,
-      Symbol  => :from_file
+      Symbol  => :from_file,
+      Hash    => :from_hash
     }
   end
 
@@ -49,11 +50,6 @@ class Pest::DataSet::Hash
     end.inject(:+)
   end
 
-  def ==(other)
-    other.kind_of?( Hash ) and hash == other.hash
-  end
-  alias :eql? :==
-
   def +(other)
     unless other.variables == variables
       raise ArgumentError, "DataSets have different variables"
@@ -86,16 +82,11 @@ class Pest::DataSet::Hash
     instance
   end
 
-  def merge(other)
-    dup.merge!(other)
-  end
-
   def merge!(other)
     other = self.class.from_hash(other) if other.kind_of?(::Hash)
     other = self.class.from_hash(other.to_hash) unless other.kind_of?(Hash)
     raise ArgumentError, "Lengths must be the same" if other.length != length
 
-    @variables += other.variables
     hash.merge! other.hash
 
     self

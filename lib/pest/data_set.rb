@@ -5,11 +5,9 @@ module Pest::DataSet
 
   include Enumerable
 
-  attr_accessor :variables, :data
-
-  def initialize(variables = Set.new, data = nil)
-    @variables = variables
-    @data = data
+  attr_accessor :variables
+  def variables
+    @variables || Set.new
   end
   alias :v :variables
 
@@ -29,10 +27,10 @@ module Pest::DataSet
     raise NotImplementedError
   end
 
-  # def ==(other)
-  #   variables == other.variables and data == other.data
-  # end
-  # alias :eql? :==
+  def ==(other)
+    variables == other.variables and to_a == other.to_a
+  end
+  alias :eql? :==
 
   def [](*args)
     raise NotImplementedError
@@ -63,8 +61,12 @@ module Pest::DataSet
     raise NotImplementedError
   end
 
-  def merge(other)
+  def merge!(other)
     raise NotImplementedError
+  end
+
+  def merge(other)
+    dup.merge!(other)
   end
 
   module ClassMethods
