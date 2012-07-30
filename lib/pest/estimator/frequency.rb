@@ -67,3 +67,4 @@ class Pest::Estimator::Frequency
     end
   end
 end
+

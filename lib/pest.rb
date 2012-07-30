@@ -17,6 +17,9 @@ require "pest/data_set/r"
 
 require "pest/estimator"
 require "pest/estimator/frequency"
+require "pest/estimator/parametric_r"
+require "pest/estimator/linear_r"
+require "pest/estimator/linear_r/categorical"
 
 module Pest
   CACHE_TO_FILE = false

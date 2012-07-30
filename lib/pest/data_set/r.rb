@@ -1,4 +1,5 @@
 require 'rserve'
+require 'r_helpers'
 
 class Pest::DataSet::R
   include Pest::DataSet
@@ -168,8 +169,6 @@ R
     self
   end
 
-  private
-
   def rserve
     unless @connection
       @connection = Rserve::Connection.new
@@ -178,6 +177,8 @@ R
 
     @connection
   end
+
+  private
 
   def file_to_r(file, attrs={})
     attrs = {:assign_to => "dataset"}.merge attrs
@@ -193,23 +194,5 @@ R
     rserve.eval script
   end
 
-  def r_slice(slice)
-    if slice.kind_of? Integer
-      (slice+1).to_s
-    elsif slice.kind_of? Enumerable
-      "c(#{slice.map {|i| r_slice(i) }.join(',')})"
-    elsif slice.kind_of? Range
-      "#{slice.begin+1}:#{slice.end+1}"
-    end
-  end
-
-  def r_variables(variables=variables)
-    if !variables.kind_of?(Enumerable)
-      "'#{variables}'"
-    elsif variables.length == 1
-      "'#{variables.first}'"
-    else
-      "c(#{variables.map {|v| "'#{v}'"}.join(',')})"
-    end
-  end
+  include RHelpers
 end
