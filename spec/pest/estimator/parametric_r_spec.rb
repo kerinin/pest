@@ -35,16 +35,7 @@ describe Pest::Estimator::ParametricR do
     end
     
     describe "#entropy" do
-      # it("returns a Float")                     { @dist.entropy.should be_a(Float) }
-
-      it "calculates -sum(PlogP)" do
-        pending
-        # Outcomes = ([1,1]: 2, [2,1]: 1, [3,1]: 1)
-        # P = (0.5, 0.25, 0.25)
-        # logP = (-1, -2, -2) (log base 2 for bits)
-        # -sum(PlogP) = (0.5, 0.5, 0.5).sum
-        @dist.entropy.should == 1.5
-      end
+      it("returns a Float")                     { @dist.entropy.should be_a(Float) }
     end
   end
 end

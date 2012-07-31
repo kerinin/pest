@@ -35,6 +35,20 @@ Add it to your Gemfile and bundle
 
     bundle install 
 
+### Installing R
+
+If you plan to use the R-based datasets and estimators, you'll need to install Rserve
+and some packages.  The first step is to [install R](http://cran.r-project.org/), then
+install the following packages:
+
+    install.packages("Rserve", "sn", "skewtools", "Zelig", "np")
+
+You can run Rserve as a daemon by running the following on the command line:
+
+    R CMD Rserve
+
+My apologies in advance for the R documentation...
+
 ## API
 
 ``` ruby

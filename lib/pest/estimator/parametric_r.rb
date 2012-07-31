@@ -38,7 +38,7 @@ module Pest::Estimator
         super(estimator, variables)
 
         script = <<-R
-          library('sn')
+          library('sn', quietly=TRUE)
           m#{model}.mle(y=dataset[,#{r_variables(variables)}])
         R
         @parameters = estimator.data.rserve.eval(script).to_ruby["dp"]
@@ -47,7 +47,7 @@ module Pest::Estimator
       def probability(data)
         data = Pest::DataSet::R.from_hash(data.to_hash) unless data.kind_of?(Pest::DataSet::R)
         script = <<-R
-          library('sn')
+          library('sn', quietly=TRUE)
           dm#{model}(dataset[,#{r_variables(variables)}], xi=as.vector(params.xi), Omega=params.omega, alpha=as.vector(params.alpha))
         R
         data.rserve.assign('params.xi', xi)
@@ -57,6 +57,12 @@ module Pest::Estimator
       end
 
       def entropy
+        data = @estimator.data
+        script = <<-R
+          library('skewtools', quietly=TRUE)
+          entropy.skew(dataset[,#{r_variables(variables)}], family="#{model.upcase}")
+        R
+        data.rserve.eval(script).to_ruby["H"]
       end
 
       private
