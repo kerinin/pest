@@ -1,15 +1,19 @@
 module Pest::Estimator
   module LinearR
-    def dichotomous
+    def dirichlet(data)
+      Dirichlet.new(data)
     end
 
-    def categorical
+    def beta(data)
+      # Beta.new(data)
     end
 
-    def discrete
+    def logit(data)
+      # Logit.new(data)
     end
 
-    def continuous
+    def probit(data)
+      # Probit.new(data)
     end
   end
 end
